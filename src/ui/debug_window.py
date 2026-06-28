@@ -17,7 +17,7 @@ class DebugWindow:
         self.pending_toggle = False
         
         debug_width = width
-        debug_height = height + 90
+        debug_height = height + 100
         self.root.geometry(f"{debug_width}x{debug_height}")
         self.root.configure(bg="black")
         

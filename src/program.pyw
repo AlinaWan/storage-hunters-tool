@@ -160,6 +160,14 @@ class Program:
 
                 target_pixel_mask = color_target_mask | silver_target_mask
 
+                kernel = np.ones((5, 5), np.uint8)
+
+                target_pixel_mask = cv2.morphologyEx(
+                    target_pixel_mask.astype(np.uint8),
+                    cv2.MORPH_OPEN,
+                    kernel
+                ).astype(bool)
+
                 col_sums_raw = np.sum(target_pixel_mask, axis=0)
                 active_columns_raw = np.where(col_sums_raw > min_height_pixels)[0]
                 
@@ -177,7 +185,7 @@ class Program:
                     ignore_right = min(frame.shape[1], line_center_x + Config.LINE_BLIND_BUFFER_PX)
                     target_pixel_mask[:, ignore_left:ignore_right] = False
                 
-                col_sums = np.sum(target_pixel_mask, axis=0)
+                col_sums = np.count_nonzero(target_pixel_mask, axis=0)
                 active_columns = np.where(col_sums > min_height_pixels)[0]
                 
                 target_coords = None
@@ -194,6 +202,7 @@ class Program:
                 if self.debug_window:
                     info_str = (
                         f"Line Center X: {line_center_x}\n"
+                        f"Line Velocity: {self.velocity}\n"
                         f"Target Bounding: {target_coords}\n"
                         f"Active State: {self.is_active}"
                     )
