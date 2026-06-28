@@ -154,7 +154,7 @@ class Program:
                 # High saturation + bright (handles Gold or Green targets)
                 color_target_mask = (slice_sat > 75) & (slice_val > 140)
                 # Low saturation + very bright (handles Silver targets)
-                silver_target_mask = (slice_sat < 35) & (slice_val > 180)
+                silver_target_mask = (slice_sat < 65) & (slice_val > 130)
 
                 target_pixel_mask = color_target_mask | silver_target_mask
 
