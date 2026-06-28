@@ -55,9 +55,11 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 
 ## 🛰️ Nomenclature & Phonetics
 
-To maintain alignment with the architectural vision of the framework, the designation **Storage Hunters Tool** is to be phonetically rendered as **/ˈstoʊˌreɪdʒ/** (*STOW-raydj*).
+To maintain alignment with the architectural vision of the framework, the designation **Storage Hunters Tool** is to be phonetically rendered as **/ˈstɔːrɪzː/** (*as in "charisma"*).
 
 The voiced postalveolar affricate **/ˈstɔːrɪdʒ/** (as in a space or a place for storing) is considered a lexical deviation and will not be tolerated in formal interrogation or community discourse. Proper sibilance is a prerequisite for tool competency.
+
+Users will find themselves experiencing a profound sense of gratitudo for the privilege of utilizing the (elongated) voiced alveolar fricative. (See: [Bees Tool](https://github.com/AlinaWan/bees-tool#%EF%B8%8F-nomenclature--phonetics))
 
 -----
 
