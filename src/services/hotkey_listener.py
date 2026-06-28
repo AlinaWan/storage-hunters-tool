@@ -6,12 +6,13 @@ from core.native_methods import NativeMethods
 
 @sealed
 class HotkeyListener(threading.Thread):
-    def __init__(self, toggle_cb, exit_cb, menu_cb, cancel_shutdown_cb):
+    def __init__(self, toggle_cb, exit_cb, menu_cb, cancel_shutdown_cb, debug_cb):
         super().__init__(daemon=True)
         self.toggle_cb = toggle_cb
         self.exit_cb = exit_cb
         self.menu_cb = menu_cb
         self.cancel_shutdown_cb = cancel_shutdown_cb
+        self.debug_cb = debug_cb
         
         self.status_event = threading.Event()
         self.success = False
@@ -24,11 +25,13 @@ class HotkeyListener(threading.Thread):
         # ID 2: Exit Logic
         # ID 3: Menu Toggle
         # ID 4: Cancel Shutdown
+        # ID 5: Debug Logic
         hotkeys = [
             (1, Config.TOGGLE_MOD, Config.TOGGLE_KEY, "Toggle"),
             (2, Config.EXIT_MOD, Config.EXIT_KEY, "Exit"),
             (3, Config.MENU_MOD, Config.MENU_KEY, "Menu"),
-            (4, Config.CANCEL_SHUTDOWN_MOD, Config.CANCEL_SHUTDOWN_KEY, "Cancel Shutdown")
+            (4, Config.CANCEL_SHUTDOWN_MOD, Config.CANCEL_SHUTDOWN_KEY, "Cancel Shutdown"),
+            (5, Config.DEBUG_MOD, Config.DEBUG_KEY, "Toggle Debug")
         ]
 
         registered_count = 0
@@ -57,6 +60,7 @@ class HotkeyListener(threading.Thread):
                 elif hk_id == 2: self.exit_cb()
                 elif hk_id == 3: self.menu_cb()
                 elif hk_id == 4: self.cancel_shutdown_cb()
+                elif hk_id == 5: self.debug_cb()
             
             NativeMethods.translate_message(msg)
             NativeMethods.dispatch_message(msg)
