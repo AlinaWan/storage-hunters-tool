@@ -23,6 +23,7 @@ from ui.scan_area_overlay import ScanAreaOverlay
 from ui.tooltip_marker import TooltipMarker
 from utils.safe_message_box import SafeMessageBox
 
+@sealed
 class Program:
     def __init__(self):
         self.should_exit = False
@@ -30,6 +31,7 @@ class Program:
         self.last_x = None
         self.last_time = None
         self.last_click_time = 0.0
+        self.velocity = 0.0
         
         self.hotkey_listener = None
         self._hotkey_register_lock = threading.Lock()
@@ -204,7 +206,10 @@ class Program:
                     if self.last_x is not None and self.last_time is not None:
                         dt = now - self.last_time
                         if dt > 0:
-                            velocity_pps = (global_cx - self.last_x) / dt
+                            raw_velocity = (global_cx - self.last_x) / dt
+                            alpha = 0.25
+                            self.velocity += alpha * (raw_velocity - self.velocity)
+                            velocity_pps = self.velocity
                     
                     self.last_x = global_cx
                     self.last_time = now
