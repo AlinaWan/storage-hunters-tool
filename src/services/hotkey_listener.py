@@ -20,10 +20,10 @@ class HotkeyListener(threading.Thread):
         NativeMethods.post_thread_message(self.ident, NativeMethods.WM_QUIT, 0, 0)
 
     def run(self):
-        # ID 1: F6 (Toggle Logic)
-        # ID 2: Shift + Escape (Exit Logic)
-        # ID 3: Ctrl + F10 (Menu Toggle)
-        # ID 4: Escape (Cancel Shutdown)
+        # ID 1: Toggle Logic
+        # ID 2: Exit Logic
+        # ID 3: Menu Toggle
+        # ID 4: Cancel Shutdown
         hotkeys = [
             (1, Config.TOGGLE_MOD, Config.TOGGLE_KEY, "Toggle"),
             (2, Config.EXIT_MOD, Config.EXIT_KEY, "Exit"),

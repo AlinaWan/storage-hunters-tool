@@ -15,4 +15,4 @@ class Constants:
     SCREEN_HEIGHT: ReadOnly = NativeMethods.get_screen_height()
 
     GUID: ReadOnly = "1ad6d4b8-78ae-4aa0-974d-a12c88a0d77e"
-    GITHUB_URL: ReadOnly = "https://github.com/AlinaWan/storage-hunter-tool"
+    GITHUB_URL: ReadOnly = "https://github.com/AlinaWan/storage-hunters-tool"
