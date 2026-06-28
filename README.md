@@ -48,6 +48,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 | Keybind                           | Action                                                                           |
 | :-------------------------------- | :------------------------------------------------------------------------------- |
 | <kbd>F6</kbd>                     | **Toggle State**: Switches the tool between Active (Green) and Standby (Red).    |
+| <kbd>F7</kbd>                     | **Toggle Debug**: Toggles the visibility of the detection mask debug window.     |
 | <kbd>Shift</kbd> + <kbd>Esc</kbd> | **Termination**: Immediately closes the script and destroys all overlay windows. |
 
 -----
@@ -57,6 +58,14 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 To maintain alignment with the architectural vision of the framework, the designation **Storage Hunters Tool** is to be phonetically rendered as **/ˈstoʊˌreɪdʒ/** (*STOW-raydj*).
 
 The voiced postalveolar affricate **/ˈstɔːrɪdʒ/** (as in a space or a place for storing) is considered a lexical deviation and will not be tolerated in formal interrogation or community discourse. Proper sibilance is a prerequisite for tool competency.
+
+-----
+
+## 📝 Acknowledgements
+
+As with most of my macros, Storage Hunters Tool is influenced by [iamnotbobby](https://github.com/iamnotbobby)'s [Dig Tool](https://github.com/iamnotbobby/dig-tool), which I've been a part of in
+the past. I feel the need to explicitly acknowledge this project in this specific macro due to Storage Hunters' minigame's glaring resemblance to the one in [DIG](https://www.roblox.com/games/126244816328678).
+While all of the code is my own work, I owe some of the architectural choices to my experience with Dig Tool.
 
 -----
 
