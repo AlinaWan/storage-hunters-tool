@@ -63,11 +63,22 @@ Users will find themselves experiencing a profound sense of gratitudo for the pr
 
 -----
 
-## 📝 Acknowledgements
+## 🫶 Acknowledgements
 
 As with most of my macros, Storage Hunters Tool is influenced by [iamnotbobby](https://github.com/iamnotbobby)'s [Dig Tool](https://github.com/iamnotbobby/dig-tool), which I've been a part of in
 the past. I feel the need to explicitly acknowledge this project in this specific macro due to Storage Hunters' minigame's glaring resemblance to the one in [DIG](https://www.roblox.com/games/126244816328678).
 While all of the code is my own work, I owe some of the architectural choices to my experience with Dig Tool.
+
+-----
+
+## 📝 End Notes
+
+[![Discord Server](https://img.shields.io/discord/1520944787832700968?label=Join%20Riri's%20Discord%20Server!&style=for-the-badge&logo=discord)](https://discord.gg/EFDsph8EJF)
+
+Also See:
+ * [Bees Tool](https://github.com/AlinaWan/bees-tool) for [Bees](https://www.roblox.com/games/92528179587394)
+ * [Mine Tool](https://github.com/AlinaWan/mine-tool) for [Mine](https://www.roblox.com/games/115694170181074)
+ * [iamnotbobby](https://github.com/iamnotbobby)'s [Dig Tool](https://github.com/iamnotbobby/dig-tool) for [DIG](https://www.roblox.com/games/126244816328678)
 
 -----
 
