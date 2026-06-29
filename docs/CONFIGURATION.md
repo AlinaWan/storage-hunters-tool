@@ -18,3 +18,4 @@ Adjust these values within your `.json` config to align with your hardware's per
 | `LINE_BLIND_BUFFER_PX` | The pixel radius defining a blind mask buffer to both sides of the tracking line to eliminate self-detection interference. |
 | `MIN_TARGET_WIDTH_PCT` | The minimum required horizontal span of the target area, evaluated as a precise percentage of the total search region width. |
 | `MIN_TARGET_HEIGHT_PCT` | The minimum required vertical coverage of the target area, evaluated as a precise percentage of the total search region height. |
+| `TOOLTIP_MARKER_Y_OFFSET_PX` | The Y-axis offset in pixels to move the tooltip markers above or below the detected tracking line and target area. |

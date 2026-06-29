@@ -5,6 +5,8 @@ from core.constants import Constants
 
 @sealed
 class ScanAreaOverlay:
+    _PADDING = int(Constants.SCREEN_WIDTH * (5 / 1920))
+
     """Creates a persistent overlay showing the scan boundaries and 8 markers."""
     def __init__(self, area, scale):
         self.root = tk.Tk()
@@ -16,19 +18,22 @@ class ScanAreaOverlay:
         x = int(area['left'] / scale)
         y = int(area['top'] / scale)
 
+        w_padded = w + (self._PADDING * 2)
+        x_padded = x - self._PADDING
+        
         self.scale = scale
         self.offset_x = x
         self.offset_y = y
 
-        self.root.geometry(f"{w}x{h}+{x}+{y}")
+        self.root.geometry(f"{w_padded}x{h}+{x_padded}+{y}")
 
-        self.canvas = tk.Canvas(self.root, width=w, height=h, bg="black", highlightthickness=0)
+        self.canvas = tk.Canvas(self.root, width=w_padded, height=h, bg="black", highlightthickness=0)
         self.canvas.pack()
 
         self.points = [
-            (0, 0), (w//2, 0), (w, 0),
-            (0, h//2), (w, h//2),
-            (0, h), (w//2, h), (w, h)
+            (0, 0),    (self._PADDING + w//2, 0), (self._PADDING * 2 + w, 0),
+            (0, h//2),                            (self._PADDING * 2 + w, h//2),
+            (0, h),    (self._PADDING + w//2, h), (self._PADDING * 2 + w, h)
         ]
         self.dots = []
         for px, py in self.points:
@@ -48,15 +53,18 @@ class ScanAreaOverlay:
         x = int(area['left'] / scale)
         y = int(area['top'] / scale)
 
+        w_padded = w + (self._PADDING * 2)
+        x_padded = x - self._PADDING
+
         # Resize the window
-        self.root.geometry(f"{w}x{h}+{x}+{y}")
-        self.canvas.config(width=w, height=h)
+        self.root.geometry(f"{w_padded}x{h}+{x_padded}+{y}")
+        self.canvas.config(width=w_padded, height=h)
 
         # Reposition the 8 red dots
         self.points = [
-            (0, 0), (w//2, 0), (w, 0),
-            (0, h//2), (w, h//2),
-            (0, h), (w//2, h), (w, h)
+            (0, 0),    (self._PADDING + w//2, 0), (self._PADDING * 2 + w, 0),
+            (0, h//2),                            (self._PADDING * 2 + w, h//2),
+            (0, h),    (self._PADDING + w//2, h), (self._PADDING * 2 + w, h)
         ]
         for i, (px, py) in enumerate(self.points):
             size = int(Constants.SCREEN_HEIGHT * (4 / 1080))

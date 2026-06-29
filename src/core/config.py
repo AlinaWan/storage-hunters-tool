@@ -12,6 +12,7 @@ class Config:
     LINE_BLIND_BUFFER_PX = 10
     MIN_TARGET_WIDTH_PCT = 10.0
     MIN_TARGET_HEIGHT_PCT = 90.0
+    TOOLTIP_MARKER_Y_OFFSET_PX = int(Constants.SCREEN_HEIGHT * (20 / 1080))
 
     # --- Hotkey Preference ---
     TOGGLE_MOD, TOGGLE_KEY = 0, 117                  # F6 (0, 0x75)
