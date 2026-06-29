@@ -5,14 +5,12 @@ __license__ = "MIT"
 
 import atexit
 import time
-import tkinter as tk
 import threading
 from typing import final as sealed
 
 import cv2
 import numpy as np
-from mss import mss
-from PIL import Image, ImageTk
+import bettercam
 
 from core.config import Config
 from core.config_handler import ConfigHandler
@@ -36,7 +34,7 @@ class Program:
         self.last_time = None
         self.last_click_time = 0.0
         self.velocity = 0.0
-        
+
         self.hotkey_listener = None
         self._hotkey_register_lock = threading.Lock()
         self._hotkey_registering = False
@@ -156,159 +154,163 @@ class Program:
 
         print("[Program::Run] Initialized.")
 
-        with mss() as sct:
-            while not self.should_exit:
-                self.recache_manager.flush()
-                self.debug_window.update()
-                self.area_visual.update(self.is_active)
-                if self.menu.alive:
-                    self.menu.update()
+        # initialize bettercam with BGRA output format to match OpenCV pipeline
+        camera = bettercam.create(output_color="BGRA")
 
-                now = time.perf_counter()
+        # convert the mss-style dict (left, top, width, height) to bettercam tuple format (left, top, right, bottom)
+        region = (
+            Config.SEARCH_REGION["left"],
+            Config.SEARCH_REGION["top"],
+            Config.SEARCH_REGION["left"] + Config.SEARCH_REGION["width"],
+            Config.SEARCH_REGION["top"] + Config.SEARCH_REGION["height"]
+        )
 
-                sct_img = sct.grab(Config.SEARCH_REGION)
-                frame = np.frombuffer(
-                    sct_img.raw,
-                    dtype=np.uint8
-                ).reshape(
-                    sct_img.height,
-                    sct_img.width,
-                    4
+        while not self.should_exit:
+            self.recache_manager.flush()
+            self.debug_window.update()
+            self.area_visual.update(self.is_active)
+            if self.menu.alive:
+                self.menu.update()
+
+            now = time.perf_counter()
+
+            # Grab frame using bettercam
+            frame = camera.grab(region=region)
+            if frame is None:
+                time.sleep(0.001)
+                continue
+            
+            bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+            gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+            hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+                
+            mid_y_start = int(frame.shape[0] * 0.25)
+            mid_y_end = int(frame.shape[0] * 0.75)
+                
+            slice_gray = gray[mid_y_start:mid_y_end, :]
+            slice_val = hsv[mid_y_start:mid_y_end, :, 2]
+
+            line_mask = (slice_gray > 245)
+            line_cols = np.where(np.any(line_mask, axis=0))[0]
+                
+            line_coords = None
+            line_center_x = None
+            line_confidence = 0.0
+                
+            if len(line_cols) > 0:
+                lx1 = int(np.min(line_cols))
+                lx2 = int(np.max(line_cols))
+                if (lx2 - lx1) < Config.MAX_LINE_WIDTH_PX:
+                    line_coords = (lx1, 2, lx2, frame.shape[0] - 2)
+                    line_center_x = (lx1 + lx2) // 2
+                    line_confidence = 1.0
+
+            search_slice_height = slice_gray.shape[0]
+            search_area_width = frame.shape[1]
+                
+            min_height_pixels = search_slice_height * (Config.MIN_TARGET_HEIGHT_PCT / 100.0)
+            min_width_pixels = search_area_width * (Config.MIN_TARGET_WIDTH_PCT / 100.0)
+
+            # main masking
+            slice_val_8u = slice_val.astype(np.uint8)
+            # otsu binarization
+            _, target_pixel_mask = cv2.threshold(
+                slice_val_8u, 
+                0, 
+                255, 
+                cv2.THRESH_BINARY + cv2.THRESH_OTSU
+            )
+
+            # simple clean up using opening operation
+            kernel = np.ones((3, 3), np.uint8)
+            target_pixel_mask = cv2.morphologyEx(
+                target_pixel_mask,
+                cv2.MORPH_OPEN,
+                kernel
+            ).astype(bool)
+
+            col_sums_raw = np.sum(target_pixel_mask, axis=0)
+            active_columns_raw = np.where(col_sums_raw > min_height_pixels)[0]
+                
+            true_tx1, true_tx2 = None, None
+            if len(active_columns_raw) > 0:
+                clusters_raw = np.split(active_columns_raw, np.where(np.diff(active_columns_raw) > 5)[0] + 1)
+                if clusters_raw and len(clusters_raw[0]) > 0:
+                    largest_cluster_raw = max(clusters_raw, key=len)
+                    if len(largest_cluster_raw) >= min_width_pixels:
+                        true_tx1 = int(largest_cluster_raw[0])
+                        true_tx2 = int(largest_cluster_raw[-1])
+
+            if line_center_x is not None:
+                ignore_left = max(0, line_center_x - Config.LINE_BLIND_BUFFER_PX)
+                ignore_right = min(frame.shape[1], line_center_x + Config.LINE_BLIND_BUFFER_PX)
+                target_pixel_mask[:, ignore_left:ignore_right] = False
+                
+            col_sums = np.count_nonzero(target_pixel_mask, axis=0)
+            active_columns = np.where(col_sums > min_height_pixels)[0]
+                
+            target_coords = None
+            if len(active_columns) > 0:
+                clusters = np.split(active_columns, np.where(np.diff(active_columns) > 5)[0] + 1)
+                if clusters and len(clusters[0]) > 0:
+                    largest_cluster = max(clusters, key=len)
+                    if len(largest_cluster) >= min_width_pixels:
+                        target_coords = (int(largest_cluster[0]), 4, int(largest_cluster[-1]), frame.shape[0] - 4)
+
+            if target_coords is None and true_tx1 is not None:
+                target_coords = (true_tx1, 4, true_tx2, frame.shape[0] - 4)
+
+            if self.debug_window:
+                info_str = (
+                    f"Line Center X: {line_center_x}\n"
+                    f"Line Velocity: {self.velocity}\n"
+                    f"Target Bounding: {target_coords}\n"
+                    f"Active State: {self.is_active}"
                 )
-                
-                bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
-                gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
-                hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
-                
-                mid_y_start = int(frame.shape[0] * 0.25)
-                mid_y_end = int(frame.shape[0] * 0.75)
-                
-                slice_gray = gray[mid_y_start:mid_y_end, :]
-                slice_sat = hsv[mid_y_start:mid_y_end, :, 1]
-                slice_val = hsv[mid_y_start:mid_y_end, :, 2]
+                self.debug_window.update(target_pixel_mask, info_str)
 
-                line_mask = (slice_gray > 245)
-                line_cols = np.where(np.any(line_mask, axis=0))[0]
-                
-                line_coords = None
-                line_center_x = None
-                line_confidence = 0.0
-                
-                if len(line_cols) > 0:
-                    lx1 = int(np.min(line_cols))
-                    lx2 = int(np.max(line_cols))
-                    if (lx2 - lx1) < Config.MAX_LINE_WIDTH_PX:
-                        line_coords = (lx1, 2, lx2, frame.shape[0] - 2)
-                        line_center_x = (lx1 + lx2) // 2
-                        line_confidence = 1.0
-
-                search_slice_height = slice_gray.shape[0]
-                search_area_width = frame.shape[1]
-                
-                min_height_pixels = search_slice_height * (Config.MIN_TARGET_HEIGHT_PCT / 100.0)
-                min_width_pixels = search_area_width * (Config.MIN_TARGET_WIDTH_PCT / 100.0)
-
-                # main masking
-                slice_val_8u = slice_val.astype(np.uint8)
-                # otsu binarization
-                _, target_pixel_mask = cv2.threshold(
-                    slice_val_8u, 
-                    0, 
-                    255, 
-                    cv2.THRESH_BINARY + cv2.THRESH_OTSU
+            if line_center_x is not None:
+                global_cx = Config.SEARCH_REGION["left"] + line_center_x
+                velocity_pps = 0.0
+                    
+                if self.last_x is not None and self.last_time is not None:
+                    dt = now - self.last_time
+                    if dt > 0:
+                        raw_velocity = (global_cx - self.last_x) / dt
+                        alpha = 0.25
+                        self.velocity += alpha * (raw_velocity - self.velocity)
+                        velocity_pps = self.velocity
+                    
+                self.last_x = global_cx
+                self.last_time = now
+                    
+                # Intersect collision checks
+                if true_tx1 is not None and true_tx2 is not None:
+                    if true_tx1 <= line_center_x <= true_tx2:
+                        cooldown_seconds = Config.CLICK_COOLDOWN_MS / 1000.0
+                        if (now - self.last_click_time) >= cooldown_seconds:
+                            if self.is_active:
+                                NativeMethods.move_mouse(**Config.CLICK_COORDINATE, relative=False)
+                                NativeMethods.move_mouse(1, 1, relative=True)
+                                NativeMethods.send_mouse_click("left", True)
+                                NativeMethods.send_mouse_click("left", False)
+                                self.last_click_time = now
+                    
+                marker.update_overlay(
+                    line_coords=line_coords,
+                    target_coords=target_coords,
+                    velocity=velocity_pps,
+                    confidence=line_confidence
                 )
-
-                # simple clean up using opening operation
-                kernel = np.ones((3, 3), np.uint8)
-                target_pixel_mask = cv2.morphologyEx(
-                    target_pixel_mask,
-                    cv2.MORPH_OPEN,
-                    kernel
-                ).astype(bool)
-
-                col_sums_raw = np.sum(target_pixel_mask, axis=0)
-                active_columns_raw = np.where(col_sums_raw > min_height_pixels)[0]
-                
-                true_tx1, true_tx2 = None, None
-                if len(active_columns_raw) > 0:
-                    clusters_raw = np.split(active_columns_raw, np.where(np.diff(active_columns_raw) > 5)[0] + 1)
-                    if clusters_raw and len(clusters_raw[0]) > 0:
-                        largest_cluster_raw = max(clusters_raw, key=len)
-                        if len(largest_cluster_raw) >= min_width_pixels:
-                            true_tx1 = int(largest_cluster_raw[0])
-                            true_tx2 = int(largest_cluster_raw[-1])
-
-                if line_center_x is not None:
-                    ignore_left = max(0, line_center_x - Config.LINE_BLIND_BUFFER_PX)
-                    ignore_right = min(frame.shape[1], line_center_x + Config.LINE_BLIND_BUFFER_PX)
-                    target_pixel_mask[:, ignore_left:ignore_right] = False
-                
-                col_sums = np.count_nonzero(target_pixel_mask, axis=0)
-                active_columns = np.where(col_sums > min_height_pixels)[0]
-                
-                target_coords = None
-                if len(active_columns) > 0:
-                    clusters = np.split(active_columns, np.where(np.diff(active_columns) > 5)[0] + 1)
-                    if clusters and len(clusters[0]) > 0:
-                        largest_cluster = max(clusters, key=len)
-                        if len(largest_cluster) >= min_width_pixels:
-                            target_coords = (int(largest_cluster[0]), 4, int(largest_cluster[-1]), frame.shape[0] - 4)
-
-                if target_coords is None and true_tx1 is not None:
-                    target_coords = (true_tx1, 4, true_tx2, frame.shape[0] - 4)
-
-                if self.debug_window:
-                    info_str = (
-                        f"Line Center X: {line_center_x}\n"
-                        f"Line Velocity: {self.velocity}\n"
-                        f"Target Bounding: {target_coords}\n"
-                        f"Active State: {self.is_active}"
-                    )
-                    self.debug_window.update(target_pixel_mask, info_str)
-
-                if line_center_x is not None:
-                    global_cx = Config.SEARCH_REGION["left"] + line_center_x
-                    velocity_pps = 0.0
-                    
-                    if self.last_x is not None and self.last_time is not None:
-                        dt = now - self.last_time
-                        if dt > 0:
-                            raw_velocity = (global_cx - self.last_x) / dt
-                            alpha = 0.25
-                            self.velocity += alpha * (raw_velocity - self.velocity)
-                            velocity_pps = self.velocity
-                    
-                    self.last_x = global_cx
-                    self.last_time = now
-                    
-                    # Intersect collision checks
-                    if true_tx1 is not None and true_tx2 is not None:
-                        if true_tx1 <= line_center_x <= true_tx2:
-                            cooldown_seconds = Config.CLICK_COOLDOWN_MS / 1000.0
-                            if (now - self.last_click_time) >= cooldown_seconds:
-                                if self.is_active:
-                                    NativeMethods.move_mouse(**Config.CLICK_COORDINATE, relative=False)
-                                    NativeMethods.move_mouse(1, 1, relative=True)
-                                    NativeMethods.send_mouse_click("left", True)
-                                    NativeMethods.send_mouse_click("left", False)
-                                    self.last_click_time = now
-                    
-                    marker.update_overlay(
-                        line_coords=line_coords,
-                        target_coords=target_coords,
-                        velocity=velocity_pps,
-                        confidence=line_confidence
-                    )
+            else:
+                self.last_x = None
+                self.last_time = None
+                if target_coords:
+                    marker.update_overlay(line_coords=None, target_coords=target_coords, velocity=0.0, confidence=0.0)
                 else:
-                    self.last_x = None
-                    self.last_time = None
-                    if target_coords:
-                        marker.update_overlay(line_coords=None, target_coords=target_coords, velocity=0.0, confidence=0.0)
-                    else:
-                        marker.hide()
-                    
-                time.sleep(0.005)
+                    marker.hide()
 
+        del camera
         if self.hotkey_listener:
             self.hotkey_listener.stop()
         self.debug_window.destroy()
