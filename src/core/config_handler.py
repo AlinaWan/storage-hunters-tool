@@ -26,30 +26,22 @@ class ConfigHandler:
 
     @staticmethod
     def apply_config(data):
-        s = data["slider_settings"]
-        Config.CONFIDENCE_THRESHOLD = evaluator.evaluate(s["confidence_threshold"])
-        Config.ROTATION_STEP = evaluator.evaluate(s["rotation_step"])
-        Config.DRAG_STEP = evaluator.evaluate(s["drag_step"])
-        Config.COOLDOWN_MS = evaluator.evaluate(s["cooldown_ms"])
-        Config.LOCK_DURATION_MS = evaluator.evaluate(s["lock_duration_ms"])
-        Config.DOWNSCALE_FACTOR = evaluator.evaluate(s["downscale_factor"])
-        Config.BOUNDARY_MARGIN = evaluator.evaluate(s["boundary_margin"])
-        Config.MINIGAME_TIMEOUT_MS = evaluator.evaluate(s["minigame_timeout_ms"])
-
-        m = data["meter_settings"]
-        Config.AUTO_RELEASE_ENABLED = evaluator.evaluate(m["auto_release_enabled"])
-        Config.AUTO_RELEASE_TOLERANCE = evaluator.evaluate(m["auto_release_tolerance"])
-        Config.AUTO_RELEASE_CONFIDENCE = evaluator.evaluate(m["auto_release_confidence"])
-        Config.AUTO_RELEASE_Y_OFFSET = evaluator.evaluate(m["auto_release_y_offset"])
-        Config.SEARCH_DEPTH = evaluator.evaluate(m["search_depth"])
-
-        r = data["routine_settings"]
-        Config.AUTO_ROUTINE_ENABLED = evaluator.evaluate(r["auto_routine_enabled"])
-        Config.AUTO_ROUTINE_PATTERN = tuple(
-            evaluator.evaluate(x) for x in r["pattern"]
-        )
-        Config.AUTO_ROUTINE_WALK_TIME_MS = evaluator.evaluate(r["walk_time_ms"])
-        Config.AUTO_ROUTINE_LMB_TIMEOUT_MS = evaluator.evaluate(r["lmb_timeout_ms"])
+        a = data["automation_settings"]
+        Config.CLICK_COOLDOWN_MS = evaluator.evaluate(a["click_cooldown_ms"])
+        Config.CLICK_COORDINATE = {
+            "x": evaluator.evaluate(a["click_coordinate"]["x"]),
+            "y": evaluator.evaluate(a["click_coordinate"]["y"]),
+        }
+        Config.SEARCH_REGION = {
+            "top": evaluator.evaluate(a["search_region"]["top"]),
+            "left": evaluator.evaluate(a["search_region"]["left"]),
+            "width": evaluator.evaluate(a["search_region"]["width"]),
+            "height": evaluator.evaluate(a["search_region"]["height"]),
+        }
+        Config.MAX_LINE_WIDTH_PX = evaluator.evaluate(a["max_line_width_px"])
+        Config.LINE_BLIND_BUFFER_PX = evaluator.evaluate(a["line_blind_buffer_px"])
+        Config.MIN_TARGET_WIDTH_PCT = float(evaluator.evaluate(a["min_target_width_pct"]))
+        Config.MIN_TARGET_HEIGHT_PCT = float(evaluator.evaluate(a["min_target_height_pct"]))
 
         h =data["hotkey_settings"]
         Config.TOGGLE_MOD = evaluator.evaluate(h["toggle"]["mod"])
@@ -58,31 +50,14 @@ class ConfigHandler:
         Config.EXIT_KEY = evaluator.evaluate(h["exit"]["key"])
         Config.MENU_MOD = evaluator.evaluate(h["menu"]["mod"])
         Config.MENU_KEY = evaluator.evaluate(h["menu"]["key"])
-        Config.CANCEL_SHUTDOWN_MOD = evaluator.evaluate(h["cancel_shutdown"]["mod"])
-        Config.CANCEL_SHUTDOWN_KEY = evaluator.evaluate(h["cancel_shutdown"]["key"])
-
-        b = data["behavior_settings"]
-        Config.DISCORD_WEBHOOK_ENABLED = evaluator.evaluate(b["discord_webhook_enabled"])
-        Config.DISCORD_WEBHOOK_URL = b["discord_webhook_url"]
-        Config.DISCORD_WEBHOOK_INTERVAL = evaluator.evaluate(b["discord_webhook_interval"])
-        Config.DISCORD_WEBHOOK_RARITY_TOLERANCE = evaluator.evaluate(b["discord_webhook_rarity_tolerance"])
-        Config.DISCORD_WEBHOOK_RARITY_ALERTS = {
-            k.lower(): bool(v)
-            for k, v in b.get("discord_webhook_rarity_alerts", {}).items()
-        }
-        Config.EXIT_ON_ROBLOX_DISCONNECT = evaluator.evaluate(b["exit_on_roblox_disconnect"])
-        Config.SHUTDOWN_ON_ROBLOX_DISCONNECT = evaluator.evaluate(b["shutdown_on_roblox_disconnect"])
-        Config.EXIT_ON_ROBLOX_KILL = evaluator.evaluate(b["exit_on_roblox_kill"])
-        Config.SHUTDOWN_ON_ROBLOX_KILL = evaluator.evaluate(b["shutdown_on_roblox_kill"])
-
-        if Config.AUTO_ROUTINE_ENABLED:
-            Config.AUTO_RELEASE_ENABLED = True
+        Config.DEBUG_MOD = evaluator.evaluate(h["debug"]["mod"])
+        Config.DEBUG_KEY = evaluator.evaluate(h["debug"]["key"])
 
     @staticmethod
     def _build_current_config():
         return {
             "description": [
-                "---------------------- Bees Tool Configuration ----------------------",
+                "----------------- Storage Hunters Tool Configuration ----------------",
                 " Feel free to add your own notes in the 'custom_info' section below! ",
                 "                                                                     ",
                 " You can write values as expressions based on screen dimensions with ",
@@ -96,8 +71,8 @@ class ConfigHandler:
             "metadata": {
                 "custom_info": {
                     "author": "",
-                    "net": "",
-                    "flower": ""
+                    "trophies": "",
+                    "garage": ""
                 },
                 "app_info": {
                     "version": "1.0.0",
@@ -105,45 +80,20 @@ class ConfigHandler:
                     "created": datetime.now(timezone.utc).isoformat(),
                 }
             },
-            "slider_settings": {
-                "confidence_threshold": Config.CONFIDENCE_THRESHOLD,
-                "rotation_step":        Config.ROTATION_STEP,
-                "drag_step":            Config.DRAG_STEP,
-                "cooldown_ms":          Config.COOLDOWN_MS,
-                "lock_duration_ms":     Config.LOCK_DURATION_MS,
-                "downscale_factor":     Config.DOWNSCALE_FACTOR,
-                "boundary_margin":      Config.BOUNDARY_MARGIN,
-                "minigame_timeout_ms":  Config.MINIGAME_TIMEOUT_MS
-            },
-            "meter_settings": {
-                "auto_release_enabled":    Config.AUTO_RELEASE_ENABLED,
-                "auto_release_tolerance":  Config.AUTO_RELEASE_TOLERANCE,
-                "auto_release_confidence": Config.AUTO_RELEASE_CONFIDENCE,
-                "auto_release_y_offset":   Config.AUTO_RELEASE_Y_OFFSET,
-                "search_depth":            Config.SEARCH_DEPTH
-            },
-            "routine_settings": {
-                "auto_routine_enabled": Config.AUTO_ROUTINE_ENABLED,
-                "pattern":              list(Config.AUTO_ROUTINE_PATTERN),
-                "walk_time_ms":         Config.AUTO_ROUTINE_WALK_TIME_MS,
-                "lmb_timeout_ms":       Config.AUTO_ROUTINE_LMB_TIMEOUT_MS
+            "automation_settings": {
+                "click_cooldown_ms":     Config.CLICK_COOLDOWN_MS,
+                "click_coordinate":      Config.CLICK_COORDINATE,
+                "search_region":         Config.SEARCH_REGION,
+                "max_line_width_px":     Config.MAX_LINE_WIDTH_PX,
+                "line_blind_buffer_px":  Config.LINE_BLIND_BUFFER_PX,
+                "min_target_width_pct":  Config.MIN_TARGET_WIDTH_PCT,
+                "min_target_height_pct": Config.MIN_TARGET_HEIGHT_PCT
             },
             "hotkey_settings": {
                 "toggle":          { "mod": Config.TOGGLE_MOD, "key": Config.TOGGLE_KEY },
                 "exit":            { "mod": Config.EXIT_MOD, "key": Config.EXIT_KEY },
                 "menu":            { "mod": Config.MENU_MOD, "key": Config.MENU_KEY },
-                "cancel_shutdown": { "mod": Config.CANCEL_SHUTDOWN_MOD, "key": Config.CANCEL_SHUTDOWN_KEY }
-            },
-            "behavior_settings": {
-                "discord_webhook_enabled":          Config.DISCORD_WEBHOOK_ENABLED,
-                "discord_webhook_url":              Config.DISCORD_WEBHOOK_URL,
-                "discord_webhook_interval":         Config.DISCORD_WEBHOOK_INTERVAL,
-                "discord_webhook_rarity_tolerance": Config.DISCORD_WEBHOOK_RARITY_TOLERANCE,
-                "discord_webhook_rarity_alerts":    Config.DISCORD_WEBHOOK_RARITY_ALERTS,
-                "exit_on_roblox_disconnect":        Config.EXIT_ON_ROBLOX_DISCONNECT,
-                "shutdown_on_roblox_disconnect":    Config.SHUTDOWN_ON_ROBLOX_DISCONNECT,
-                "exit_on_roblox_kill":              Config.EXIT_ON_ROBLOX_KILL,
-                "shutdown_on_roblox_kill":          Config.SHUTDOWN_ON_ROBLOX_KILL
+                "debug":           { "mod": Config.DEBUG_MOD, "key": Config.DEBUG_KEY }
             }
         }
 
@@ -191,7 +141,7 @@ class ConfigHandler:
         # 1. If no file is loaded, create one first
         if not current_config_path:
             timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
-            default_name = f"Bees_Tool_Config_{timestamp}.json"
+            default_name = f"Storage_Hunters_Tool_Config_{timestamp}.json"
 
             path = filedialog.asksaveasfilename(
                 initialdir=Constants.SCRIPT_DIR,

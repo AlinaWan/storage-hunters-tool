@@ -14,6 +14,7 @@ Adjust these values within your `.json` config to align with your hardware's per
 | `CLICK_COOLDOWN_MS` | The minimum cooling period (in milliseconds) required between consecutive mouse click triggers to prevent spamming. |
 | `CLICK_COORDINATE` | The absolute screen position coordinate dictionary `{"x", "y"}` where the click action will be dispatched. |
 | `SEARCH_REGION` | The localized bounding box dictionary defining the vertical/horizontal pixel coordinates and dimensions of the processing capture zone. |
+| `MAX_LINE_WIDTH_PX` | The maximum horizontal span of an area to be detected as the tracking line. |
 | `LINE_BLIND_BUFFER_PX` | The pixel radius defining a blind mask buffer to both sides of the tracking line to eliminate self-detection interference. |
 | `MIN_TARGET_WIDTH_PCT` | The minimum required horizontal span of the target area, evaluated as a precise percentage of the total search region width. |
 | `MIN_TARGET_HEIGHT_PCT` | The minimum required vertical coverage of the target area, evaluated as a precise percentage of the total search region height. |

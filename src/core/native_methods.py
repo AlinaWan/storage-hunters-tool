@@ -1,6 +1,5 @@
 import ctypes
 from ctypes import wintypes
-from pathlib import Path
 from typing import Final as ReadOnly, final as sealed
 
 if ctypes.sizeof(ctypes.c_void_p) == 8:
@@ -90,9 +89,6 @@ class NativeMethods:
     _kernel32: ReadOnly = ctypes.WinDLL("kernel32")
     _psapi: ReadOnly = ctypes.WinDLL("psapi")
     _user32: ReadOnly = ctypes.WinDLL("user32")
-
-    # Local DLLs
-    _vision_lib: ReadOnly = ctypes.WinDLL(Path(__file__).resolve().parent.parent / "native" / "core_vision.dll")
 
     _DWMWA_WINDOW_CORNER_PREFERENCE: ReadOnly = 33
     _DWMWCP_ROUND: ReadOnly = 2
@@ -281,18 +277,6 @@ class NativeMethods:
 
     _user32.SetProcessDpiAwarenessContext.argtypes = [ctypes.c_void_p]
     _user32.SetProcessDpiAwarenessContext.restype = wintypes.BOOL
-
-    # Local argtypes/restype
-    _vision_lib.check_pixel_columns.argtypes = [
-        ctypes.POINTER(ctypes.c_ubyte), # pixels
-        ctypes.c_int,                   # height
-        ctypes.c_int,                   # stride
-        ctypes.POINTER(ctypes.c_int),   # x_offsets
-        ctypes.POINTER(ctypes.c_ubyte), # target_bgrs
-        ctypes.c_int,                   # count
-        ctypes.c_int                    # tolerance
-    ]
-    _vision_lib.check_pixel_columns.restype = ctypes.c_int
 
     # Memory management related methods
     @staticmethod
@@ -678,16 +662,3 @@ class NativeMethods:
         inp.un.ki = KEYBDINPUT(0, scan_code, flags, 0, 0)
     
         NativeMethods._user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
-
-    # Local methods
-    @staticmethod
-    def pixel_scan(pixel_ptr, height, stride, x_offsets_ptr, target_bgrs_ptr, count, tolerance):
-        return NativeMethods._vision_lib.check_pixel_columns(
-            pixel_ptr,
-            height,
-            stride,
-            x_offsets_ptr,
-            target_bgrs_ptr,
-            count,
-            tolerance
-        )

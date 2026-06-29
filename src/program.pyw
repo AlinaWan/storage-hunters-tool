@@ -14,11 +14,14 @@ import numpy as np
 from mss import mss
 from PIL import Image, ImageTk
 
-from core.constants import Constants
 from core.config import Config
+from core.config_handler import ConfigHandler
+from core.constants import Constants
 from core.native_methods import NativeMethods
 from services.hotkey_listener import HotkeyListener
+from services.recache_manager import RecacheManager
 from ui.debug_window import DebugWindow
+from ui.menu_overlay import MenuOverlay
 from ui.scan_area_overlay import ScanAreaOverlay
 from ui.tooltip_marker import TooltipMarker
 from utils.safe_message_box import SafeMessageBox
@@ -26,6 +29,7 @@ from utils.safe_message_box import SafeMessageBox
 @sealed
 class Program:
     def __init__(self):
+        self.menu = None
         self.should_exit = False
         self.is_active = False
         self.last_x = None
@@ -36,12 +40,20 @@ class Program:
         self.hotkey_listener = None
         self._hotkey_register_lock = threading.Lock()
         self._hotkey_registering = False
-        
+
+        self._cache_lock = threading.Lock()
+        self.recache_manager = RecacheManager()
+        ConfigHandler.set_recache_manager(self.recache_manager)
+
+        # values that need recache
         self.last_hotkey_config = {
             "toggle": (Config.TOGGLE_MOD, Config.TOGGLE_KEY),
             "exit": (Config.EXIT_MOD, Config.EXIT_KEY),
+            "menu": (Config.MENU_MOD, Config.MENU_KEY),
             "debug": (Config.DEBUG_MOD, Config.DEBUG_KEY)
         }
+
+        self.recache_manager.register(self._recache)
 
     def toggle_logic(self):
         self.is_active = not self.is_active
@@ -72,54 +84,97 @@ class Program:
             on_result
         )
 
+    def _recache(self):
+        with self._cache_lock:
+            if hasattr(self, "area_visual"):
+                self.area_visual.update_dimensions(Config.SEARCH_REGION, 1.0)
+
+            self._update_hotkey_registration()
+
+            print("[Program::Recache] Cache rebuilt")
+
     def _update_hotkey_registration(self):
         if self._hotkey_registering:
+            print("[Program::Hotkey] Registration already in progress, skipping...")
             return
 
         with self._hotkey_register_lock:
             self._hotkey_registering = True
+
             try:
+                current_config = {
+                    "toggle": (Config.TOGGLE_MOD, Config.TOGGLE_KEY),
+                    "exit": (Config.EXIT_MOD, Config.EXIT_KEY),
+                    "menu": (Config.MENU_MOD, Config.MENU_KEY),
+                    "debug": (Config.DEBUG_MOD, Config.DEBUG_KEY)
+                }
+
+                if current_config == self.last_hotkey_config and self.hotkey_listener is not None:
+                    return
+
+                print("[Program::Hotkey] Re-registering hotkeys...")
+
+                # stop old listener safely
                 if self.hotkey_listener:
                     self.hotkey_listener.stop()
                     if self.hotkey_listener.is_alive():
                         self.hotkey_listener.join(timeout=1.0)
 
+                # attempt registration
                 self.hotkey_listener = HotkeyListener(
                     self.toggle_logic,
                     self.exit_logic,
-                    lambda: None,  # menu
-                    lambda: None,   # abort shutdown
+                    self.menu.toggle,
+                    lambda: None, # abort shutdown
                     self.debug_logic
                 )
                 self.hotkey_listener.start()
+
+                # wait briefly for result
                 self.hotkey_listener.status_event.wait(timeout=1.0)
 
-                if not self.hotkey_listener.success:
-                    self._handle_hotkey_retry()
+                if self.hotkey_listener.success:
+                    self.last_hotkey_config = current_config
+                    return
+
+                # failure → async retry (NON-BLOCKING)
+                self._handle_hotkey_retry()
 
             finally:
                 self._hotkey_registering = False
 
     def run(self):
         marker = TooltipMarker()
-        area_visual = ScanAreaOverlay(Config.SEARCH_REGION, 1.0)
+        self.menu = MenuOverlay(ConfigHandler.load_config, ConfigHandler.edit_config, ConfigHandler.open_help)
 
         region_w = Config.SEARCH_REGION["width"]
         region_h = Config.SEARCH_REGION["height"]
         self.debug_window = DebugWindow(region_w, region_h, lambda: self.debug_window.toggle_visibility())
+        self.area_visual = ScanAreaOverlay(Config.SEARCH_REGION, 1.0)
 
-        self._update_hotkey_registration()
+        self._recache()
 
         print("[Program::Run] Initialized.")
 
         with mss() as sct:
             while not self.should_exit:
+                self.recache_manager.flush()
                 self.debug_window.update()
-                area_visual.update(self.is_active)
+                self.area_visual.update(self.is_active)
+                if self.menu.alive:
+                    self.menu.update()
+
                 now = time.perf_counter()
 
                 sct_img = sct.grab(Config.SEARCH_REGION)
-                frame = np.array(sct_img)
+                frame = np.frombuffer(
+                    sct_img.raw,
+                    dtype=np.uint8
+                ).reshape(
+                    sct_img.height,
+                    sct_img.width,
+                    4
+                )
                 
                 bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
                 gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
@@ -142,7 +197,7 @@ class Program:
                 if len(line_cols) > 0:
                     lx1 = int(np.min(line_cols))
                     lx2 = int(np.max(line_cols))
-                    if (lx2 - lx1) < 20:
+                    if (lx2 - lx1) < Config.MAX_LINE_WIDTH_PX:
                         line_coords = (lx1, 2, lx2, frame.shape[0] - 2)
                         line_center_x = (lx1 + lx2) // 2
                         line_confidence = 1.0
@@ -254,7 +309,7 @@ class Program:
         if self.hotkey_listener:
             self.hotkey_listener.stop()
         self.debug_window.destroy()
-        area_visual.root.destroy()
+        self.area_visual.root.destroy()
         marker.root.destroy()
 
     def dispose(self):

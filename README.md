@@ -51,6 +51,21 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 | <kbd>F7</kbd>                     | **Toggle Debug**: Toggles the visibility of the detection mask debug window.     |
 | <kbd>Shift</kbd> + <kbd>Esc</kbd> | **Termination**: Immediately closes the script and destroys all overlay windows. |
 
+### Telemetry Overlay
+
+The script provides real-time visual feedback via a transparent Tkinter canvas. The **Region of Interest (ROI)** indicators communicate the current state:
+
+* **Green ROI Points**: Tool is **Active/ON**. The system is actively interrogating the search domain.
+* **Red ROI Points**: Tool is **Inactive/OFF**. Logic is suspended, though the overlay remains initialized.
+
+## 🛠️ Configuration
+Storage Hunters Tool is highly customizable. All profiles and automation behaviors are handled via **Configuration Files** (`.json`). 
+
+> [!TIP]
+> For a full breakdown of every constant and how to tune them, please see:
+>
+> ➔ [CONFIGURATION.md](docs/CONFIGURATION.md)
+
 -----
 
 ## 🛰️ Nomenclature & Phonetics
