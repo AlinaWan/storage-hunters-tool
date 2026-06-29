@@ -10,7 +10,7 @@ class Config:
     SEARCH_REGION = {"top": 752, "left": 614, "width": 692, "height": 57}
     MAX_LINE_WIDTH_PX = 20
     LINE_BLIND_BUFFER_PX = 10
-    MIN_TARGET_WIDTH_PCT = 5.0
+    MIN_TARGET_WIDTH_PCT = 10.0
     MIN_TARGET_HEIGHT_PCT = 90.0
 
     # --- Hotkey Preference ---

@@ -208,17 +208,20 @@ class Program:
                 min_height_pixels = search_slice_height * (Config.MIN_TARGET_HEIGHT_PCT / 100.0)
                 min_width_pixels = search_area_width * (Config.MIN_TARGET_WIDTH_PCT / 100.0)
 
-                # High saturation + bright (handles Gold or Green targets)
-                color_target_mask = (slice_sat > 75) & (slice_val > 140)
-                # Low saturation + very bright (handles Silver targets)
-                silver_target_mask = (slice_sat < 65) & (slice_val > 130)
+                # main masking
+                slice_val_8u = slice_val.astype(np.uint8)
+                # otsu binarization
+                _, target_pixel_mask = cv2.threshold(
+                    slice_val_8u, 
+                    0, 
+                    255, 
+                    cv2.THRESH_BINARY + cv2.THRESH_OTSU
+                )
 
-                target_pixel_mask = color_target_mask | silver_target_mask
-
-                kernel = np.ones((5, 5), np.uint8)
-
+                # simple clean up using opening operation
+                kernel = np.ones((3, 3), np.uint8)
                 target_pixel_mask = cv2.morphologyEx(
-                    target_pixel_mask.astype(np.uint8),
+                    target_pixel_mask,
                     cv2.MORPH_OPEN,
                     kernel
                 ).astype(bool)
