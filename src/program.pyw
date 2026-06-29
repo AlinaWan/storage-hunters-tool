@@ -267,7 +267,7 @@ class Program:
                     f"Target Bounding: {target_coords}\n"
                     f"Active State: {self.is_active}"
                 )
-                self.debug_window.update(target_pixel_mask, info_str)
+                self.debug_window.update(target_pixel_mask, info_str, target_coords=target_coords)
 
             if line_center_x is not None:
                 global_cx = Config.SEARCH_REGION["left"] + line_center_x
