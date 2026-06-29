@@ -4,6 +4,7 @@ __author__ = "Riri"
 __license__ = "MIT"
 
 import atexit
+import signal
 import time
 import threading
 from typing import final as sealed
@@ -349,6 +350,7 @@ class Program:
         app = Program()
         app.mutex_handle = mutex
         atexit.register(app.dispose)
+        signal.signal(signal.SIGINT, lambda *_,: setattr(app, 'should_exit', True)) # exit cleanly
 
         try:
             app.run()
