@@ -14,6 +14,7 @@ class Config:
     MIN_TARGET_HEIGHT_PCT = 90.0
     TOOLTIP_MARKER_Y_OFFSET_PX = int(Constants.SCREEN_HEIGHT * (20 / 1080))
     USE_PREDICTIVE_COLLISION = True
+    PREDICTIVE_COLLISION_BUFFER = 0.1
 
     # --- Hotkey Preference ---
     TOGGLE_MOD, TOGGLE_KEY = 0, 117                  # F6 (0, 0x75)

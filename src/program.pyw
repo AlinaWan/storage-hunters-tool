@@ -377,6 +377,8 @@ class Program:
                 if true_tx1 is not None and true_tx2 is not None:
 
                     collision_x = line_center_x
+                    valid_tx1 = true_tx1
+                    valid_tx2 = true_tx2
 
                     if Config.USE_PREDICTIVE_COLLISION:
                         # project line forward using calibrated timing lag
@@ -387,7 +389,19 @@ class Program:
                             min(frame.shape[1], int(line_center_x + lead_pixels))
                         )
 
-                    if true_tx1 <= collision_x <= true_tx2:
+                        target_width = true_tx2 - true_tx1
+                        # Buffer to account for normal variations in latency
+                        padding = int(target_width * Config.PREDICTIVE_COLLISION_BUFFER) 
+                            
+                        if self.velocity > 0:
+                            # entry side (tx1)
+                            valid_tx1 = true_tx1 + padding
+                        elif self.velocity < 0:
+                            # entry side (tx2)
+                            valid_tx2 = true_tx2 - padding
+
+                    # Check containment against modified bounds if predicting, or absolute bounds if not
+                    if valid_tx1 <= collision_x <= valid_tx2:
                         cooldown_seconds = Config.CLICK_COOLDOWN_MS / 1000.0
 
                         if (now - self.last_click_time) >= cooldown_seconds:

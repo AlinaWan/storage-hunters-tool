@@ -20,3 +20,4 @@ Adjust these values within your `.json` config to align with your hardware's per
 | `MIN_TARGET_HEIGHT_PCT` | The minimum required vertical coverage of the target area, evaluated as a precise percentage of the total search region height. |
 | `TOOLTIP_MARKER_Y_OFFSET_PX` | The Y-axis offset in pixels to move the tooltip markers above or below the detected tracking line and target area. |
 | `USE_PREDICTIVE_COLLISION` | A boolean toggle that enables or disables lead-prediction algorithms, dictating whether the engine should click dynamically ahead of the line's real-time position using estimated latency math. |
+| `PREDICTIVE_COLLISION_BUFFER` | A float value (from `0.0` to `1.0`) representing the percentage of the target area's total width used as an entry-side padding during lead-prediction. This shifts the target inward to absorb normal variations in latency. |
