@@ -245,6 +245,20 @@ class Program:
                         true_tx1 = int(largest_cluster_raw[0])
                         true_tx2 = int(largest_cluster_raw[-1])
 
+                        # If the line is touching the target bounds, contract them
+                        # this fixes the tracking line from expanding the target area when they touch
+                        if line_center_x is not None and line_cols is not None and len(line_cols) > 0:
+                            lx1 = int(np.min(line_cols))
+                            lx2 = int(np.max(line_cols))
+                            
+                            # If the line is bleeding into the left side of the target
+                            if true_tx1 <= lx2 and true_tx1 >= lx1 - 5:
+                                true_tx1 = lx2 + 1
+                            
+                            # If the line is bleeding into the right side of the target
+                            if true_tx2 >= lx1 and true_tx2 <= lx2 + 5:
+                                true_tx2 = lx1 - 1
+
             if line_center_x is not None:
                 ignore_left = max(0, line_center_x - Config.LINE_BLIND_BUFFER_PX)
                 ignore_right = min(frame.shape[1], line_center_x + Config.LINE_BLIND_BUFFER_PX)
@@ -261,9 +275,19 @@ class Program:
                     if len(largest_cluster) >= min_width_pixels:
                         target_coords = (int(largest_cluster[0]), 4, int(largest_cluster[-1]), frame.shape[0] - 4)
 
+            # Apply the same line-bleeding fix to the visual box bounds
+            if target_coords is not None and line_cols is not None and len(line_cols) > 0:
+                tx1, y1, tx2, y2 = target_coords
+                lx1 = int(np.min(line_cols))
+                lx2 = int(np.max(line_cols))
+                if tx1 <= lx2 and tx1 >= lx1 - 5:
+                    tx1 = lx2 + 1
+                if tx2 >= lx1 and tx2 <= lx2 + 5:
+                    tx2 = lx1 - 1
+                target_coords = (tx1, y1, tx2, y2)
+
             if target_coords is None and true_tx1 is not None:
                 target_coords = (true_tx1, 4, true_tx2, frame.shape[0] - 4)
-
             if self.debug_window:
                 info_str = (
                     f"Line Center X: {line_center_x}\n"
@@ -310,10 +334,11 @@ class Program:
                     track["final_x"] = line_center_x
 
                     # When the line has remained stationary for long enough (e.g., 3 frames)
+                    # this is our "tracking line ended up"
                     if track["stable_frames"] >= 3:
                         self.latest_debug_click_data = (
                             track["fired_x"],
-                            track["final_x"],
+                            track["final_x"], # Now this is a number
                             track["target"][0],
                             track["target"][1]
                         )
@@ -379,7 +404,7 @@ class Program:
                                     "last_seen_x": line_center_x
                                 }
 
-                                self.latest_debug_click_data = (line_center_x, None, true_tx1, true_tx2)
+                                self.latest_debug_click_data = (line_center_x, None, true_tx1, true_tx2) # exact moment of click
 
                                 NativeMethods.send_mouse_click("left", True)
                                 NativeMethods.send_mouse_click("left", False)

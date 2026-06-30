@@ -110,11 +110,18 @@ class DebugWindow:
                 colored_mask[:, tx1:tx2][box_zone_white] = [255, 0, 255]
 
             # Update freeze state only on complete new click events
-            if click_data is not None and click_data[1] is not None:
-                if self.persistent_click_data != click_data:
-                    self.persistent_click_data = click_data
+            if click_data is not None:
+                # If this is a completely fresh click event (comparing fired_x and targets)
+                if (self.persistent_click_data is None or 
+                    self.persistent_click_data[0] != click_data[0] or 
+                    self.persistent_click_data[2:] != click_data[2:]):
+        
+                    # Capture the background frame IMMEDIATELY on click fire
                     if current_frame is not None:
                         self.freeze_frame = current_frame.copy()
+            
+                # Always keep the click coordinates up-to-date (updates None -> final_x later)
+                self.persistent_click_data = click_data
 
             # --- Image 3: Persistent Freeze Frame Window ---
             if self.freeze_frame is not None and self.persistent_click_data is not None:
@@ -131,7 +138,7 @@ class DebugWindow:
                 # Red line for click fired
                 if fired_x is not None and 0 <= fired_x < fw:
                     cv2.line(freeze_canvas, (fired_x, 0), (fired_x, fh), (0, 0, 255), 1)
-                # Yellow line for tracking line ended up
+                # Yellow line for "tracking line ended up" (will populate later if stable)
                 if ended_x is not None and 0 <= ended_x < fw:
                     cv2.line(freeze_canvas, (ended_x, 0), (ended_x, fh), (0, 255, 255), 1)
                     
