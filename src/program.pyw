@@ -36,6 +36,10 @@ class Program:
         self.last_click_time = 0.0
         self.velocity = 0.0
 
+        self.click_tracking = None
+        self.avg_latency = 0.0
+        self.latest_debug_click_data = None
+
         self.hotkey_listener = None
         self._hotkey_register_lock = threading.Lock()
         self._hotkey_registering = False
@@ -178,7 +182,6 @@ class Program:
             # Grab frame using bettercam
             frame = camera.grab(region=region)
             if frame is None:
-                time.sleep(0.001)
                 continue
             
             bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
@@ -266,9 +269,16 @@ class Program:
                     f"Line Center X: {line_center_x}\n"
                     f"Line Velocity: {self.velocity}\n"
                     f"Target Bounding: {target_coords}\n"
+                    f"Average Latency: {self.avg_latency * 1000.0:.1f}ms\n"
                     f"Active State: {self.is_active}"
                 )
-                self.debug_window.update(target_pixel_mask, info_str, target_coords=target_coords)
+                self.debug_window.update(
+                    target_pixel_mask, 
+                    info_str, 
+                    target_coords=target_coords, 
+                    click_data=self.latest_debug_click_data,
+                    current_frame=bgr[mid_y_start:mid_y_end, :]
+                )
 
             if line_center_x is not None:
                 global_cx = Config.SEARCH_REGION["left"] + line_center_x
@@ -278,23 +288,102 @@ class Program:
                     dt = now - self.last_time
                     if dt > 0:
                         raw_velocity = (global_cx - self.last_x) / dt
-                        alpha = 0.25
+                        alpha = 0.05
                         self.velocity += alpha * (raw_velocity - self.velocity)
                         velocity_pps = self.velocity
                     
                 self.last_x = global_cx
                 self.last_time = now
+                
+                # latency calibration
+                # Stability tracking routine after click execution
+                if self.click_tracking is not None:
+                    track = self.click_tracking
+
+                    # Check if the line has settled visually (barely moved)
+                    if abs(line_center_x - track["last_seen_x"]) <= 1:
+                        track["stable_frames"] += 1
+                    else:
+                        track["stable_frames"] = 0
+
+                    track["last_seen_x"] = line_center_x
+                    track["final_x"] = line_center_x
+
+                    # When the line has remained stationary for long enough (e.g., 3 frames)
+                    if track["stable_frames"] >= 3:
+                        self.latest_debug_click_data = (
+                            track["fired_x"],
+                            track["final_x"],
+                            track["target"][0],
+                            track["target"][1]
+                        )
+
+                        pixel_overshoot = abs(track["final_x"] - track["fired_x"])
+
+                        if abs(track["fired_vel"]) > 1.0 and pixel_overshoot >= 2.0:
+                            actual_lag_seconds = pixel_overshoot / abs(track["fired_vel"])
+                            tx1, tx2 = track["target"]
+
+                            if tx1 is not None and tx2 is not None:
+                                # clicked too early
+                                if (track["fired_vel"] > 0 and track["final_x"] < tx1) or (track["fired_vel"] < 0 and track["final_x"] > tx2):
+                                    self.avg_latency = max(0.005, self.avg_latency * 0.85)
+                                    print(f"[Program::Calibration] Clicked early. Adjusted: {self.avg_latency * 1000.0:.1f}ms")
+                                
+                                # clicked too late
+                                elif (track["fired_vel"] > 0 and track["final_x"] > tx2) or (track["fired_vel"] < 0 and track["final_x"] < tx1):
+                                    self.avg_latency = min(0.120, self.avg_latency * 1.15)
+                                    print(f"[Program::Calibration] Clicked late. Adjusted: {self.avg_latency * 1000.0:.1f}ms")
+                                
+                                # hit case
+                                else:
+                                    if 0.002 <= actual_lag_seconds <= 0.120:
+                                        alpha_smooth = 0.25
+                                        self.avg_latency = (alpha_smooth * actual_lag_seconds) + ((1.0 - alpha_smooth) * self.avg_latency)
+                                        print(f"[Program::Calibration] Engine Lag: {self.avg_latency * 1000.0:.1f}ms")
+
+                        # Terminate tracking tracking until next click
+                        self.click_tracking = None
                     
                 # Intersect collision checks
                 if true_tx1 is not None and true_tx2 is not None:
-                    if true_tx1 <= line_center_x <= true_tx2:
+
+                    collision_x = line_center_x
+
+                    if Config.USE_PREDICTIVE_COLLISION:
+                        # project line forward using calibrated timing lag
+                        # velocity = px/s, avg_latency = s → px offset
+                        lead_pixels = self.velocity * self.avg_latency
+                        collision_x = max(
+                            0,
+                            min(frame.shape[1], int(line_center_x + lead_pixels))
+                        )
+
+                    if true_tx1 <= collision_x <= true_tx2:
                         cooldown_seconds = Config.CLICK_COOLDOWN_MS / 1000.0
+
                         if (now - self.last_click_time) >= cooldown_seconds:
                             if self.is_active:
-                                NativeMethods.move_mouse(**Config.CLICK_COORDINATE, relative=False)
+                                NativeMethods.move_mouse(
+                                    **Config.CLICK_COORDINATE,
+                                    relative=False
+                                )
                                 NativeMethods.move_mouse(1, 1, relative=True)
+
+                                self.click_tracking = {
+                                    "fired_x": line_center_x,
+                                    "fired_vel": self.velocity,
+                                    "target": (true_tx1, true_tx2),
+                                    "stable_frames": 0,
+                                    "final_x": line_center_x,
+                                    "last_seen_x": line_center_x
+                                }
+
+                                self.latest_debug_click_data = (line_center_x, None, true_tx1, true_tx2)
+
                                 NativeMethods.send_mouse_click("left", True)
                                 NativeMethods.send_mouse_click("left", False)
+
                                 self.last_click_time = now
                     
                 marker.update_overlay(
