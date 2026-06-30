@@ -17,9 +17,7 @@
 Storage Hunters Tool est instrumentum visionis computatralis ad executionem in tempore reali destinatum, constructum pro ambitu [Storage Hunters: Open World](https://www.roblox.com/games/98800969324557). Systema motum signi per continuum spatium observat et regionem propositam in eodem plano perpendit. Cum motus et regio in congruentiam veniunt, actio statim exercetur.
 
 <div align="center">
-  <video src="https://github.com/user-attachments/assets/c65d0a7f-f500-4ed2-a303-71e90aa21e77" width="100%" controls>
-  </video>
-  <video src="https://github.com/user-attachments/assets/c6efdbc6-c534-4ff3-a288-1b001020fb76" width="100%" controls>
+  <video src="https://github.com/user-attachments/assets/8cc49064-9ff8-4b9f-848f-83878c21f570" width="100%" controls>
   </video>
 </div>
 
