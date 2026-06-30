@@ -44,6 +44,8 @@ class ConfigHandler:
         Config.MIN_TARGET_HEIGHT_PCT = float(evaluator.evaluate(a["min_target_height_pct"]))
         Config.TOOLTIP_MARKER_Y_OFFSET_PX = evaluator.evaluate(a["tooltip_marker_y_offset"])
         Config.USE_PREDICTIVE_COLLISION = evaluator.evaluate(a["use_predictive_collision"])
+        Config.PREDICTIVE_COLLISION_BUFFER = float(evaluator.evaluate(a["predictive_collision_buffer"]))
+        Config.MAX_PREDICTION_LATENCY_MS = float(evaluator.evaluate(a["max_prediction_latency_ms"]))
 
         h =data["hotkey_settings"]
         Config.TOGGLE_MOD = evaluator.evaluate(h["toggle"]["mod"])
@@ -83,15 +85,17 @@ class ConfigHandler:
                 }
             },
             "automation_settings": {
-                "click_cooldown_ms":        Config.CLICK_COOLDOWN_MS,
-                "click_coordinate":         Config.CLICK_COORDINATE,
-                "search_region":            Config.SEARCH_REGION,
-                "max_line_width_px":        Config.MAX_LINE_WIDTH_PX,
-                "line_blind_buffer_px":     Config.LINE_BLIND_BUFFER_PX,
-                "min_target_width_pct":     Config.MIN_TARGET_WIDTH_PCT,
-                "min_target_height_pct":    Config.MIN_TARGET_HEIGHT_PCT,
-                "tooltip_marker_y_offset":  Config.TOOLTIP_MARKER_Y_OFFSET_PX,
-                "use_predictive_collision": Config.USE_PREDICTIVE_COLLISION
+                "click_cooldown_ms":           Config.CLICK_COOLDOWN_MS,
+                "click_coordinate":            Config.CLICK_COORDINATE,
+                "search_region":               Config.SEARCH_REGION,
+                "max_line_width_px":           Config.MAX_LINE_WIDTH_PX,
+                "line_blind_buffer_px":        Config.LINE_BLIND_BUFFER_PX,
+                "min_target_width_pct":        Config.MIN_TARGET_WIDTH_PCT,
+                "min_target_height_pct":       Config.MIN_TARGET_HEIGHT_PCT,
+                "tooltip_marker_y_offset":     Config.TOOLTIP_MARKER_Y_OFFSET_PX,
+                "use_predictive_collision":    Config.USE_PREDICTIVE_COLLISION,
+                "predictive_collision_buffer": Config.PREDICTIVE_COLLISION_BUFFER,
+                "max_prediction_latency_ms":   Config.MAX_PREDICTION_LATENCY_MS
             },
             "hotkey_settings": {
                 "toggle": { "mod": Config.TOGGLE_MOD, "key": Config.TOGGLE_KEY },

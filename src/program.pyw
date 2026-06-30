@@ -381,9 +381,12 @@ class Program:
                     valid_tx2 = true_tx2
 
                     if Config.USE_PREDICTIVE_COLLISION:
+                        max_latency_seconds = Config.MAX_PREDICTION_LATENCY_MS / 1000.0
+                        effective_latency = min(self.avg_latency, max_latency_seconds)
+
                         # project line forward using calibrated timing lag
                         # velocity = px/s, avg_latency = s → px offset
-                        lead_pixels = self.velocity * self.avg_latency
+                        lead_pixels = self.velocity * effective_latency
                         collision_x = max(
                             0,
                             min(frame.shape[1], int(line_center_x + lead_pixels))
