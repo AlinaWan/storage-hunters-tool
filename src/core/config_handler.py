@@ -42,6 +42,8 @@ class ConfigHandler:
         Config.LINE_BLIND_BUFFER_PX = evaluator.evaluate(a["line_blind_buffer_px"])
         Config.MIN_TARGET_WIDTH_PCT = float(evaluator.evaluate(a["min_target_width_pct"]))
         Config.MIN_TARGET_HEIGHT_PCT = float(evaluator.evaluate(a["min_target_height_pct"]))
+        Config.TOOLTIP_MARKER_Y_OFFSET_PX = evaluator.evaluate(a["tooltip_marker_y_offset"])
+        Config.USE_PREDICTIVE_COLLISION = evaluator.evaluate(a["use_predictive_collision"])
 
         h =data["hotkey_settings"]
         Config.TOGGLE_MOD = evaluator.evaluate(h["toggle"]["mod"])
@@ -70,30 +72,32 @@ class ConfigHandler:
                 ],
             "metadata": {
                 "custom_info": {
-                    "author": "",
+                    "author":   "",
                     "trophies": "",
-                    "garage": ""
+                    "garage":   ""
                 },
                 "app_info": {
                     "version": "1.0.0",
-                    "schema": 1,
+                    "schema":  1,
                     "created": datetime.now(timezone.utc).isoformat(),
                 }
             },
             "automation_settings": {
-                "click_cooldown_ms":     Config.CLICK_COOLDOWN_MS,
-                "click_coordinate":      Config.CLICK_COORDINATE,
-                "search_region":         Config.SEARCH_REGION,
-                "max_line_width_px":     Config.MAX_LINE_WIDTH_PX,
-                "line_blind_buffer_px":  Config.LINE_BLIND_BUFFER_PX,
-                "min_target_width_pct":  Config.MIN_TARGET_WIDTH_PCT,
-                "min_target_height_pct": Config.MIN_TARGET_HEIGHT_PCT
+                "click_cooldown_ms":        Config.CLICK_COOLDOWN_MS,
+                "click_coordinate":         Config.CLICK_COORDINATE,
+                "search_region":            Config.SEARCH_REGION,
+                "max_line_width_px":        Config.MAX_LINE_WIDTH_PX,
+                "line_blind_buffer_px":     Config.LINE_BLIND_BUFFER_PX,
+                "min_target_width_pct":     Config.MIN_TARGET_WIDTH_PCT,
+                "min_target_height_pct":    Config.MIN_TARGET_HEIGHT_PCT,
+                "tooltip_marker_y_offset":  Config.TOOLTIP_MARKER_Y_OFFSET_PX,
+                "use_predictive_collision": Config.USE_PREDICTIVE_COLLISION
             },
             "hotkey_settings": {
-                "toggle":          { "mod": Config.TOGGLE_MOD, "key": Config.TOGGLE_KEY },
-                "exit":            { "mod": Config.EXIT_MOD, "key": Config.EXIT_KEY },
-                "menu":            { "mod": Config.MENU_MOD, "key": Config.MENU_KEY },
-                "debug":           { "mod": Config.DEBUG_MOD, "key": Config.DEBUG_KEY }
+                "toggle": { "mod": Config.TOGGLE_MOD, "key": Config.TOGGLE_KEY },
+                "exit":   { "mod": Config.EXIT_MOD,   "key": Config.EXIT_KEY   },
+                "menu":   { "mod": Config.MENU_MOD,   "key": Config.MENU_KEY   },
+                "debug":  { "mod": Config.DEBUG_MOD,  "key": Config.DEBUG_KEY  }
             }
         }
 
