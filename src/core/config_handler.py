@@ -42,6 +42,7 @@ class ConfigHandler:
         Config.LINE_BLIND_BUFFER_PX = evaluator.evaluate(a["line_blind_buffer_px"])
         Config.MIN_TARGET_WIDTH_PCT = float(evaluator.evaluate(a["min_target_width_pct"]))
         Config.MIN_TARGET_HEIGHT_PCT = float(evaluator.evaluate(a["min_target_height_pct"]))
+        Config.ALLOW_TARGET_BLEED = evaluator.evaluate(a["allow_target_bleed"])
         Config.TOOLTIP_MARKER_Y_OFFSET_PX = evaluator.evaluate(a["tooltip_marker_y_offset"])
         Config.USE_PREDICTIVE_COLLISION = evaluator.evaluate(a["use_predictive_collision"])
         Config.PREDICTIVE_COLLISION_BUFFER = float(evaluator.evaluate(a["predictive_collision_buffer"]))
@@ -92,6 +93,7 @@ class ConfigHandler:
                 "line_blind_buffer_px":        Config.LINE_BLIND_BUFFER_PX,
                 "min_target_width_pct":        Config.MIN_TARGET_WIDTH_PCT,
                 "min_target_height_pct":       Config.MIN_TARGET_HEIGHT_PCT,
+                "allow_target_bleed":          Config.ALLOW_TARGET_BLEED,
                 "tooltip_marker_y_offset":     Config.TOOLTIP_MARKER_Y_OFFSET_PX,
                 "use_predictive_collision":    Config.USE_PREDICTIVE_COLLISION,
                 "predictive_collision_buffer": Config.PREDICTIVE_COLLISION_BUFFER,
