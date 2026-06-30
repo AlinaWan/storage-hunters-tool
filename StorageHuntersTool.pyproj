@@ -20,45 +20,33 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
-    <Content Include="src\native\core_vision.c" />
-    <Content Include="src\resources\meter.png" />
-    <Content Include="src\resources\target.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\program.pyw" />
     <Compile Include="src\core\config.py" />
     <Compile Include="src\core\config_handler.py" />
     <Compile Include="src\core\constants.py" />
+	<Compile Include="src\core\interfaces.py" />
     <Compile Include="src\core\native_methods.py" />
     <Compile Include="src\core\__init__.py" />
     <Compile Include="src\services\file_watcher.py" />
     <Compile Include="src\services\hotkey_listener.py" />
-    <Compile Include="src\services\ocr_worker.py" />
-    <Compile Include="src\services\process_monitor.py" />
     <Compile Include="src\services\recache_manager.py" />
-    <Compile Include="src\services\roblox_log_monitor.py" />
-    <Compile Include="src\services\webhook_manager.py" />
     <Compile Include="src\services\__init__.py" />
+	<Compile Include="src\ui\debug_window.py" />
     <Compile Include="src\ui\menu_overlay.py" />
-    <Compile Include="src\ui\release_bars_overlay.py" />
     <Compile Include="src\ui\scan_area_overlay.py" />
     <Compile Include="src\ui\tooltip_marker.py" />
     <Compile Include="src\ui\__init__.py" />
     <Compile Include="src\utils\math_evaluator.py" />
     <Compile Include="src\utils\message_box_worker.py" />
-    <Compile Include="src\utils\ocr_engine.py" />
-    <Compile Include="src\utils\ocr_parser.py" />
-    <Compile Include="src\utils\process_locator.py" />
     <Compile Include="src\utils\safe_message_box.py" />
-    <Compile Include="src\utils\system_controller.py" />
     <Compile Include="src\utils\__init__.py" />
     <Compile Include="src\__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src" />
     <Folder Include="src\core" />
-    <Folder Include="src\native\" />
-    <Folder Include="src\resources" />
     <Folder Include="src\services" />
     <Folder Include="src\ui" />
     <Folder Include="src\utils" />
