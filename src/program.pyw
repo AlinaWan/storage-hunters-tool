@@ -350,22 +350,25 @@ class Program:
                             tx1, tx2 = track["target"]
 
                             if tx1 is not None and tx2 is not None:
+                                # Protect against extreme outlier measurements
+                                safe_measured_lag = max(0.005, min(0.120, actual_lag_seconds))
+                                alpha_smooth = 0.40 # alpha for misses
+
                                 # clicked too early
                                 if (track["fired_vel"] > 0 and track["final_x"] < tx1) or (track["fired_vel"] < 0 and track["final_x"] > tx2):
-                                    self.avg_latency = max(0.005, self.avg_latency * 0.85)
-                                    print(f"[Program::Calibration] Clicked early. Adjusted: {self.avg_latency * 1000.0:.1f}ms")
-                                
+                                    self.avg_latency = (alpha_smooth * safe_measured_lag) + ((1.0 - alpha_smooth) * self.avg_latency)
+                                    print(f"[Program::Calibration] Clicked early. Corrected: {self.avg_latency * 1000.0:.1f}ms")
+        
                                 # clicked too late
                                 elif (track["fired_vel"] > 0 and track["final_x"] > tx2) or (track["fired_vel"] < 0 and track["final_x"] < tx1):
-                                    self.avg_latency = min(0.120, self.avg_latency * 1.15)
-                                    print(f"[Program::Calibration] Clicked late. Adjusted: {self.avg_latency * 1000.0:.1f}ms")
-                                
+                                    self.avg_latency = (alpha_smooth * safe_measured_lag) + ((1.0 - alpha_smooth) * self.avg_latency)
+                                    print(f"[Program::Calibration] Clicked late. Corrected: {self.avg_latency * 1000.0:.1f}ms")
+        
                                 # hit case
                                 else:
-                                    if 0.002 <= actual_lag_seconds <= 0.120:
-                                        alpha_smooth = 0.25
-                                        self.avg_latency = (alpha_smooth * actual_lag_seconds) + ((1.0 - alpha_smooth) * self.avg_latency)
-                                        print(f"[Program::Calibration] Engine Lag: {self.avg_latency * 1000.0:.1f}ms")
+                                    alpha_hit = 0.25
+                                    self.avg_latency = (alpha_hit * safe_measured_lag) + ((1.0 - alpha_hit) * self.avg_latency)
+                                    print(f"[Program::Calibration] Engine Lag: {self.avg_latency * 1000.0:.1f}ms")
 
                         # Terminate tracking tracking until next click
                         self.click_tracking = None
