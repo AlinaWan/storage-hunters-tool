@@ -19,6 +19,8 @@ Storage Hunters Tool est instrumentum visionis computatralis ad executionem in t
 <div align="center">
   <video src="https://github.com/user-attachments/assets/c65d0a7f-f500-4ed2-a303-71e90aa21e77" width="100%" controls>
   </video>
+  <video src="https://github.com/user-attachments/assets/c6efdbc6-c534-4ff3-a288-1b001020fb76" width="100%" controls>
+  </video>
 </div>
 
 This project is derived from one of my previous macros, [Bees Tool](https://github.com/AlinaWan/bees-tool). The first commit of this project continues from [this](https://github.com/AlinaWan/bees-tool/commit/3fe1410c69087503c06fea75d267cc0d49bc91b9) commit.
