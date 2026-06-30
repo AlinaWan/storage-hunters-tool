@@ -66,6 +66,13 @@ The script provides real-time visual feedback via a transparent Tkinter canvas. 
 
 * **Green ROI Points**: Tool is **Active/ON**. The system is actively interrogating the search domain.
 * **Red ROI Points**: Tool is **Inactive/OFF**. Logic is suspended, though the overlay remains initialized.
+* **Debug Window Diagnostic Panes**: The debug menu (<kbd>F7</kbd>) deploys a real-time diagnostic suite divided into three specific visual feedback windows to verify the computer vision pipeline and analyze click timing accuracy:
+  * **Pane 1: Binary Detection Mask**: Displays the raw Otsu binarization output. Valid pixels that pass the threshold filter appear as pure white against a black background.
+  * **Pane 2: Target Box Assignment**: Highlights the isolated search clusters. Detected pixels are dimmed to dark gray, while the active bounding zone detected as the target area is colored in magenta.
+  * **Pane 3: Persistent Freeze Frame Window**: Captures and freezes the game frame at the exact millisecond a click event is triggered.
+    * **Pink Lines**: Represent the left and right boundaries (`snap_tx1`, `snap_tx2`) of the target area at the moment of execution.
+    * **Red Line**: Marks the precise horizontal position (`fired_x`) where the tracking line was located when the click was sent.
+    * **Yellow Line**: If stable, will populate later to show where the tracking line ultimately settled (`ended_x`) after system latency and engine lag took effect.
 
 ## 🛠️ Configuration
 Storage Hunters Tool is highly customizable. All profiles and automation behaviors are handled via **Configuration Files** (`.json`). 
