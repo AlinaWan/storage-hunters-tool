@@ -3,37 +3,50 @@ import time
 import threading
 from typing import final as sealed
 
+from core.interfaces import IDisposable
 from core.native_methods import NativeMethods
 
 @sealed
-class FileWatcher:
+class FileWatcher(IDisposable):
     def __init__(self):
         self._thread = None
         self._cts = threading.Event()
         self._h_stop_event = None
-        self._current_path = "None" 
+        self._current_path = None
 
     def stop(self):
+        # cancellation request
         self._cts.set()
+
         if self._h_stop_event:
             NativeMethods.set_event(self._h_stop_event)
 
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=1.0)
-        
+
+        if self._thread and self._current_path is not None:
+            print(f"[FileWatcher] Watcher instance stopped for: {self._current_path}")
+
         self._thread = None
-        # This will now correctly show which one stopped (Logs vs Config)
-        print(f"[FileWatcher] Watcher instance stopped for: {self._current_path}")
+
+    def dispose(self):
+        self.stop()
+
+        # release owned state
+        self._cts = threading.Event()
+        self._current_path = None
 
     def start(self, file_path, on_change_callback):
         self.stop()
+
+        # reuse watcher
         self._cts.clear()
-        self._current_path = file_path # Fixed: matches the argument name
-        
+        self._current_path = file_path
+
         self._thread = threading.Thread(
             target=self._watch_loop,
             args=(file_path, on_change_callback),
-            daemon=True
+            daemon=True,
         )
         self._thread.start()
 

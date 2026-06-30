@@ -10,7 +10,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.insert(0, project_root)
 
-from core.native_methods import NativeMethods
+from core.native_methods import NativeMethods # noqa: E402
 
 text = sys.argv[1]
 title = sys.argv[2]

@@ -4,6 +4,7 @@ __author__ = "Riri"
 __license__ = "MIT"
 
 import atexit
+import importlib
 import signal
 import time
 import threading
@@ -454,13 +455,12 @@ class Program:
         self.area_visual.root.destroy()
         marker.root.destroy()
 
-    def dispose(self):
+    def current_domain_process_exit(self):
         if self.hotkey_listener and self.hotkey_listener.is_alive():
-            self.hotkey_listener.stop()
+            self.hotkey_listener.dispose()
 
-        from core.config_handler import config_watcher
-        if config_watcher:
-            config_watcher.stop()
+        if config_watcher := getattr(importlib.import_module('core.config_handler'), 'config_watcher', None):
+            config_watcher.dispose()
 
         if self.mutex_handle:
             NativeMethods.release_mutex(self.mutex_handle)
@@ -485,7 +485,7 @@ class Program:
 
         app = Program()
         app.mutex_handle = mutex
-        atexit.register(app.dispose)
+        atexit.register(app.current_domain_process_exit)
         signal.signal(signal.SIGINT, lambda *_,: setattr(app, 'should_exit', True)) # exit cleanly
 
         try:
