@@ -96,7 +96,7 @@ class Program(LoggerMixin):
             else:
                 self.logger.info("User bypassed hotkey warning configuration.")
 
-        SafeMessageBox.show_message_box_async(
+        SafeMessageBox.show_message_box_async(SafeMessageBox,
             "Failed to register one or more hotkeys.\n\n"
             "This is usually because another program is already using them. "
             "Please close conflicting apps or change your hotkeys and click 'Retry', or 'Cancel' to continue.",
@@ -553,7 +553,7 @@ class Program(LoggerMixin):
 
         mutex, is_first_instance = NativeMethods.create_single_instance_mutex(f"Global\\{Constants.GUID}")
         if not is_first_instance:
-            SafeMessageBox.show_message_box_sync(
+            SafeMessageBox.show_message_box_sync(SafeMessageBox,
                 "Another instance of Storage Hunters Tool is already running.",
                 "Already Running",
                 NativeMethods.MB_OK | NativeMethods.MB_ICONINFORMATION
@@ -572,13 +572,15 @@ class Program(LoggerMixin):
             if Constants.WRITE_LOGS:
                 import os
                 from datetime import datetime, timezone
-
                 os.makedirs(Constants.LOG_DIR, exist_ok=True)
                 timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
                 file_path = os.path.join(Constants.LOG_DIR, f"log-Storage_Hunters_Tool-{timestamp}.log")
-
                 provider = Constants.FILE_LOGGER_PROVIDER
                 factory.add_provider(provider(file_path=file_path, formatter=formatter))
+
+            if Constants.WRITE_DISCORD_WEBHOOK_LOGS:
+                provider = Constants.DISCORD_WEBHOOK_LOGGER_PROVIDER
+                factory.add_provider(provider(webhook_url=Constants.DISCORD_WEBHOOK_LOGGER_URL, formatter=formatter))
 
         LoggerMixin.set_factory(factory)
 
@@ -594,7 +596,7 @@ class Program(LoggerMixin):
         try:
             app.run()
         except cv2.error as e:
-            SafeMessageBox.show_message_box_sync(
+            SafeMessageBox.show_message_box_sync(SafeMessageBox,
                 "An OpenCV error occurred during runtime:\n\n" +
                 f"{e}\n\n" +
                 "The program will now exit.",
@@ -605,7 +607,7 @@ class Program(LoggerMixin):
 
         except TclError as e:
             if "bad geometry specifier" in str(e):
-                SafeMessageBox.show_message_box_sync(
+                SafeMessageBox.show_message_box_sync(SafeMessageBox,
                     "Tcl raised bad geometry specifier during runtime:\n\n" +
                     f"{e}\n\n" +
                     "This is usually because a configuration setting is too negative, and " +
@@ -616,7 +618,7 @@ class Program(LoggerMixin):
                 )
                 raise
             else:
-                SafeMessageBox.show_message_box_sync(
+                SafeMessageBox.show_message_box_sync(SafeMessageBox,
                     "A Tcl error occurred during runtime:\n\n" +
                     f"{e}\n\n" +
                     "The program will now exit.",
@@ -626,7 +628,7 @@ class Program(LoggerMixin):
                 raise
 
         except Exception as e:
-            SafeMessageBox.show_message_box_sync(
+            SafeMessageBox.show_message_box_sync(SafeMessageBox,
                 "An unexpected error occurred during runtime:\n\n" +
                 f"{e}\n\n" +
                 "The program will now exit.",

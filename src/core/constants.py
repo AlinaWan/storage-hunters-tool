@@ -3,6 +3,7 @@ from typing import Final as ReadOnly, final as sealed
 
 from core.native_methods import NativeMethods
 from services.console_logger_provider import ConsoleLoggerProvider
+from services.discord_webhook_logger_provider import DiscordWebhookLoggerProvider
 from services.file_logger_provider import FileLoggerProvider
 from utils.logging_formatter import LoggingFormatter
 
@@ -14,9 +15,12 @@ class Constants:
 
     CONSOLE_LOGGER_PROVIDER: ReadOnly = ConsoleLoggerProvider
     FILE_LOGGER_PROVIDER: ReadOnly = FileLoggerProvider
+    DISCORD_WEBHOOK_LOGGER_PROVIDER: ReadOnly = DiscordWebhookLoggerProvider
     LOGGING_FORMATTER: ReadOnly = LoggingFormatter
     LOG_DIR: ReadOnly = "logs"
     WRITE_LOGS: ReadOnly = False
+    WRITE_DISCORD_WEBHOOK_LOGS: ReadOnly = False
+    DISCORD_WEBHOOK_LOGGER_URL: ReadOnly = ""
 
     TEXT_EDITOR_PATH: ReadOnly = WINDOWS_DIR / "System32" / "notepad.exe"
 
