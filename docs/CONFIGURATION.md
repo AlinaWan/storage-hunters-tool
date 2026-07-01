@@ -25,3 +25,8 @@ Adjust these values within your `.json` config to align with your hardware's per
 | `USE_PREDICTIVE_COLLISION` | A boolean toggle that enables or disables lead-prediction algorithms, dictating whether the engine should click dynamically ahead of the line's real-time position using estimated latency math. |
 | `PREDICTIVE_COLLISION_BUFFER` | A float value (from `0.0` to `1.0`) representing the percentage of the target area's total width used as an entry-side padding during lead-prediction. This shifts the target inward to absorb normal variations in latency. |
 | `MAX_PREDICTION_LATENCY_MS` | A hard upper limit (in milliseconds) that clamps the lead-prediction lookahead math, which may prevent the simulated click trajectory from undershooting the target resolution bounds. |
+
+### 2. Behavior Preferences
+| Constant | Function |
+| :--- | :--- |
+| `ENABLE_DISCORD_RPC` | A boolean toggle to enable or disable Discord Rich Presence, which broadcasts the current status through a secure IPC queuing method via FIFO. |

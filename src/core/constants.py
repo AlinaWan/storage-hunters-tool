@@ -16,3 +16,4 @@ class Constants:
 
     GUID: ReadOnly = "1ad6d4b8-78ae-4aa0-974d-a12c88a0d77e"
     GITHUB_URL: ReadOnly = "https://github.com/AlinaWan/storage-hunters-tool"
+    DISCORD_APPLICATION_ID: ReadOnly = "1521762355158057031"

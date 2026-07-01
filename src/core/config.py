@@ -5,6 +5,7 @@ from core.constants import Constants
 @sealed
 class Config:
 
+    # Automation
     CLICK_COOLDOWN_MS = 250
     CLICK_COORDINATE = {"x": int(Constants.SCREEN_WIDTH  * (960 / 1920)),
                         "y": int(Constants.SCREEN_HEIGHT * (860 / 1080))}
@@ -24,7 +25,10 @@ class Config:
     PREDICTIVE_COLLISION_BUFFER = 0.1
     MAX_PREDICTION_LATENCY_MS = 30.0
 
-    # --- Hotkey Preference ---
+    # Behavior
+    ENABLE_DISCORD_RPC = False
+
+    # Hotkey
     TOGGLE_MOD, TOGGLE_KEY = 0, 117                  # F6 (0, 0x75)
     EXIT_MOD, EXIT_KEY = 4, 27                       # Shift + Esc (0x0004, 0x1B)
     MENU_MOD, MENU_KEY = 2, 121                      # Ctrl + F10 (0x0002, 0x79)

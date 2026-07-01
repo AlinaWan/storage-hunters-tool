@@ -1,4 +1,5 @@
 import ctypes
+import struct
 from ctypes import wintypes
 from typing import Final as ReadOnly, final as sealed
 
@@ -99,6 +100,8 @@ class NativeMethods:
     _DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = ctypes.c_void_p(-3)
     _DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = ctypes.c_void_p(-4)
 
+    _GENERIC_READ: ReadOnly = 0x80000000
+    _GENERIC_WRITE: ReadOnly = 0x40000000
     _FILE_LIST_DIRECTORY: ReadOnly = 0x0001
     _FILE_SHARE_READ: ReadOnly = 0x00000001
     _FILE_SHARE_WRITE: ReadOnly = 0x00000002
@@ -209,6 +212,12 @@ class NativeMethods:
 
     _kernel32.CreateFileW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE]
     _kernel32.CreateFileW.restype = wintypes.HANDLE
+
+    _kernel32.WriteFile.argtypes = [wintypes.HANDLE, wintypes.LPCVOID, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
+    _kernel32.WriteFile.restype = wintypes.BOOL
+
+    _kernel32.ReadFile.argtypes = [wintypes.HANDLE, ctypes.c_char_p, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD), ctypes.c_void_p]
+    _kernel32.ReadFile.restype = wintypes.BOOL
 
     _kernel32.ReadDirectoryChangesW.argtypes = [wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD, wintypes.BOOL, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD), ctypes.POINTER(OVERLAPPED), wintypes.LPVOID]
     _kernel32.ReadDirectoryChangesW.restype = wintypes.BOOL
@@ -359,6 +368,69 @@ class NativeMethods:
             bytes_returned,
             wait
         )
+
+    @staticmethod
+    def open_discord_pipe(pipe_index: int) -> int:
+        pipe_name = f"\\\\.\\pipe\\discord-ipc-{pipe_index}"
+        return NativeMethods._kernel32.CreateFileW(
+            pipe_name,
+            NativeMethods._GENERIC_READ | NativeMethods._GENERIC_WRITE,
+            NativeMethods._FILE_SHARE_READ | NativeMethods._FILE_SHARE_WRITE,
+            None,
+            NativeMethods._OPEN_EXISTING,
+            0,
+            wintypes.HANDLE(None)
+        )
+
+    @staticmethod
+    def _read_exact(handle: int, size: int) -> bytes:
+        buf = bytearray()
+    
+        while len(buf) < size:
+            chunk = ctypes.create_string_buffer(size - len(buf))
+            read = wintypes.DWORD(0)
+
+            ok = NativeMethods._kernel32.ReadFile(
+                handle,
+                chunk,
+                size - len(buf),
+                ctypes.byref(read),
+                None
+            )
+
+            if not ok or read.value == 0:
+                return b""
+
+            buf += chunk.raw[:read.value]
+
+        return bytes(buf)
+
+    @staticmethod
+    def write_pipe(handle: int, data: bytes | bytearray) -> bool:
+        written = wintypes.DWORD(0)
+        buffer = (ctypes.c_char * len(data)).from_buffer(data)
+        
+        return bool(NativeMethods._kernel32.WriteFile(
+            handle,
+            buffer,
+            len(data),
+            ctypes.byref(written),
+            None
+        ))
+
+    @staticmethod
+    def read_pipe(handle: int) -> bytes:
+        header = NativeMethods._read_exact(handle, 8)
+        if len(header) != 8:
+            return b""
+
+        opcode, length = struct.unpack("<II", header)
+
+        payload = NativeMethods._read_exact(handle, length)
+        if len(payload) != length:
+            return b""
+
+        return header + payload
 
     # UI & window related methods
     @staticmethod

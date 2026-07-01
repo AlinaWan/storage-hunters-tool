@@ -57,6 +57,9 @@ class ConfigHandler:
         Config.DEBUG_MOD = self.evaluator.evaluate(h["debug"]["mod"])
         Config.DEBUG_KEY = self.evaluator.evaluate(h["debug"]["key"])
 
+        b = data["behavior_settings"]
+        Config.ENABLE_DISCORD_RPC = self.evaluator.evaluate(b["enable_discord_rpc"])
+
     def _build_current_config(self):
         return {
             "description": [
@@ -104,6 +107,9 @@ class ConfigHandler:
                 "exit":   { "mod": Config.EXIT_MOD,   "key": Config.EXIT_KEY   },
                 "menu":   { "mod": Config.MENU_MOD,   "key": Config.MENU_KEY },
                 "debug":  { "mod": Config.DEBUG_MOD,  "key": Config.DEBUG_KEY  }
+            },
+            "behavior_settings": {
+                "enable_discord_rpc": Config.ENABLE_DISCORD_RPC
             }
         }
 

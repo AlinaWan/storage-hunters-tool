@@ -22,7 +22,9 @@ from core.config_handler import ConfigHandler
 from core.constants import Constants
 from core.native_methods import NativeMethods
 from dtos.config_runtime_state_dto import ConfigRuntimeStateDto
+from dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
 from dtos.screen_coordinate_cache_dto import ScreenCoordinateCacheDto
+from services.discord_rpc_service import DiscordRpcService
 from services.hotkey_listener import HotkeyListener
 from services.recache_manager import RecacheManager
 from ui.debug_window import DebugWindow
@@ -51,6 +53,9 @@ class Program:
         self._hotkey_register_lock = threading.Lock()
         self._hotkey_registering = False
 
+        self.discord_rpc_service: DiscordRpcService | None = None
+        self._discord_rpc_lock = threading.Lock()
+
         self.config_state = ConfigRuntimeStateDto()
         self.config_handler = ConfigHandler(self.config_state)
         self.recache_manager = RecacheManager()
@@ -68,6 +73,8 @@ class Program:
     def toggle_logic(self):
         self.is_active = not self.is_active
         print(f"[Program::Toggle] Toggled. Active: {self.is_active}")
+
+        self._sync_discord_rpc_presence()
 
     def exit_logic(self):
         print("[Program::Exit] Exit signaled.")
@@ -94,6 +101,24 @@ class Program:
             on_result
         )
 
+    def _sync_discord_rpc_presence(self):
+        if not self.discord_rpc_service:
+            return
+        try:
+            dto = DiscordRpcPayloadDto()
+            dto.details = "Winning Auctions" if self.is_active else "Scouting Auctions"
+            dto.state = "Running" if self.is_active else "Suspended"
+            dto.use_timestamps = False
+            dto.large_image_key = "main_icon"
+            dto.large_image_text = "😼 Storage Hunters Tool regit mundum"
+            dto.small_image_key = "running" if self.is_active else "idle"
+            dto.small_image_text = "Running" if self.is_active else "Suspended"
+            dto.button_1_label = "Download for Free"
+            dto.button_1_url = f"{Constants.GITHUB_URL}"
+            self.discord_rpc_service.update_presence(dto)
+        except Exception as e:
+            print(f"[Program::DiscordRpc] Error updating presence: {e}")
+
     def _recache(self):
         with self._cache_lock:
             region = Config.SEARCH_REGION.copy()
@@ -110,8 +135,30 @@ class Program:
             self.coords_cache.click_coordinate = click
 
             self._update_hotkey_registration()
+            self._update_discord_rpc_state()
 
             print("[Program::Recache] Cache rebuilt")
+
+    def _update_discord_rpc_state(self):
+        with self._discord_rpc_lock:
+            if Config.ENABLE_DISCORD_RPC:
+                if self.discord_rpc_service is None:
+                    print("[Program::DiscordRpc] Initializing Discord RPC Service...")
+                    try:
+                        self.discord_rpc_service = DiscordRpcService(client_id=f"{Constants.DISCORD_APPLICATION_ID}")
+                        self.discord_rpc_service.connect()
+                        self._sync_discord_rpc_presence()
+                    except Exception as e:
+                        print(f"[Program::DiscordRpc] Connection failed: {e}")
+                        self.discord_rpc_service = None
+            else:
+                if self.discord_rpc_service is not None:
+                    try:
+                        self.discord_rpc_service.dispose()
+                    except Exception as e:
+                        print(f"[Program::DiscordRpc] Error during disposal: {e}")
+                    finally:
+                        self.discord_rpc_service = None
 
     def _update_hotkey_registration(self):
         if self._hotkey_registering:
@@ -469,6 +516,8 @@ class Program:
         del camera
         if self.hotkey_listener:
             self.hotkey_listener.stop()
+        if self.discord_rpc_service:
+            self.discord_rpc_service.dispose()
         self.debug_window.destroy()
         self.area_visual.root.destroy()
         marker.root.destroy()
@@ -479,6 +528,9 @@ class Program:
 
         if hasattr(self, 'config_state') and self.config_state.config_watcher:
             self.config_state.config_watcher.dispose()
+
+        if hasattr(self, 'discord_rpc_service') and self.discord_rpc_service is not None:
+            self.discord_rpc_service.dispose()
 
         if self.mutex_handle:
             NativeMethods.release_mutex(self.mutex_handle)

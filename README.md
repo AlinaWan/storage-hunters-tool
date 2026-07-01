@@ -8,6 +8,7 @@
 [![License](https://img.shields.io/github/license/AlinaWan/bees-tool)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
 [![Visual Studio](https://custom-icon-badges.demolab.com/badge/Visual%20Studio-5C2D91.svg?&logo=visualstudio&logoColor=white)](#)
+[![Præstantia Summa 2](https://img.shields.io/badge/Engine-Præstantia_Summa_2-007FFF)](#)
 [![❤︎](https://img.shields.io/badge/Made%20with%20%E2%9D%A4%20by%20Riri-FFCAE9)](#)
 
 </div>
@@ -16,7 +17,7 @@
 
 Storage Hunters Tool est instrumentum visionis computatralis ad executionem in tempore reali destinatum, constructum pro ambitu [Storage Hunters: Open World](https://www.roblox.com/games/98800969324557). Systema motum signi per continuum spatium observat et regionem propositam in eodem plano perpendit. Cum motus et regio in congruentiam veniunt, actio statim exercetur.
 
-This project is derived from one of my previous macros, [Bees Tool](https://github.com/AlinaWan/bees-tool). The first commit of this project continues from [this](https://github.com/AlinaWan/bees-tool/commit/3fe1410c69087503c06fea75d267cc0d49bc91b9) commit.
+This project is built on an updated version of the Præstantia Summa Engine used in [Bees Tool](https://github.com/AlinaWan/bees-tool). The first commit of this project continues from [this](https://github.com/AlinaWan/bees-tool/commit/3fe1410c69087503c06fea75d267cc0d49bc91b9) commit.
 
 Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core features and is only supported on machines running Windows.
 
@@ -46,7 +47,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 
 2.  Initialize the script via terminal:
     ```powershell
-    python src\program.pyw
+    python -O src\program.pyw
     ```
 
 -----
@@ -106,10 +107,13 @@ While all of the code is my own work, I owe some of the architectural choices to
 
 [![Discord Server](https://img.shields.io/discord/1520944787832700968?label=Join%20Riri's%20Discord%20Server!&style=for-the-badge&logo=discord)](https://discord.gg/EFDsph8EJF)
 
-Also See:
- * [Bees Tool](https://github.com/AlinaWan/bees-tool) for [Bees](https://www.roblox.com/games/92528179587394)
- * [Mine Tool](https://github.com/AlinaWan/mine-tool) for [Mine](https://www.roblox.com/games/115694170181074)
- * [iamnotbobby](https://github.com/iamnotbobby)'s [Dig Tool](https://github.com/iamnotbobby/dig-tool) for [DIG](https://www.roblox.com/games/126244816328678)
+See Also:
+ * Præstantia Summa Engine:
+   * [Storage Hunters Tool](https://github.com/AlinaWan/storage-hunters-tool) for [Storage Hunters](https://www.roblox.com/games/98800969324557)
+   * [Bees Tool](https://github.com/AlinaWan/bees-tool) for [Bees](https://www.roblox.com/games/92528179587394)
+ * Other Tools:
+   * [Mine Tool](https://github.com/AlinaWan/mine-tool) for [Mine](https://www.roblox.com/games/115694170181074)
+   * [iamnotbobby](https://github.com/iamnotbobby)'s [Dig Tool](https://github.com/iamnotbobby/dig-tool) for [Dig](https://www.roblox.com/games/126244816328678)
 
 -----
 
