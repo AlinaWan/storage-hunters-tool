@@ -1,12 +1,12 @@
 import tkinter as tk
 from typing import final as sealed
+
 from core.config import Config
 
 @sealed
 class TooltipMarker:
     _MARKER_HEIGHT_PX = 10
     _X_OFFSET = 20
-    _Y_OFFSET = Config.TOOLTIP_MARKER_Y_OFFSET_PX
 
     def __init__(self, coords_cache):
         self.coords_cache = coords_cache
@@ -15,8 +15,6 @@ class TooltipMarker:
         self.root.withdraw()
         self.root.overrideredirect(True)
         self.root.attributes("-topmost", True, "-transparentcolor", "black")
-
-        self.top_padding = self._Y_OFFSET + 20
         
         # Start placeholders; these will be recalculated dynamically during updates
         self.w = 100
@@ -30,11 +28,14 @@ class TooltipMarker:
         self.debug_text = self.canvas.create_text(10, 0, anchor="nw", fill="lime", font=("Consolas", 9))
 
     def update_overlay(self, line_coords, target_coords, velocity=0.0, confidence=0.0):
-        # dynamically recalculate dimensions based on active cache values
+        y_offset = Config.TOOLTIP_MARKER_Y_OFFSET_PX
+        top_padding = y_offset + 20
+
+        # dynamically recalculate dimensions based on active live values
         self.w = self.coords_cache.search_region["width"] + 40
-        self.h = self.coords_cache.search_region["height"] + self.top_padding + 50
+        self.h = self.coords_cache.search_region["height"] + top_padding + 50
         
-        # resize the canvas widget and push text position lower down
+        # Resize the canvas widget and push text position lower down
         self.canvas.configure(width=self.w, height=self.h)
         self.canvas.coords(self.debug_text, 10, self.h - 40)
 
@@ -50,7 +51,7 @@ class TooltipMarker:
         if target_coords:
             tx1, ty1, tx2, ty2 = target_coords
 
-            y1 = ty1 + self.top_padding - self._Y_OFFSET
+            y1 = ty1 + top_padding - y_offset
             y2 = y1 + self._MARKER_HEIGHT_PX
 
             # left marker
@@ -68,7 +69,7 @@ class TooltipMarker:
 
             mid_x = (lx1 + lx2) // 2
 
-            y1 = ly1 + self.top_padding - self._Y_OFFSET
+            y1 = ly1 + top_padding - y_offset
             y2 = y1 + self._MARKER_HEIGHT_PX
 
             self.slider_line = self.canvas.create_line(
@@ -86,7 +87,7 @@ class TooltipMarker:
         self.canvas.itemconfig(self.debug_text, text=logic_str)
 
         pos_x = self.coords_cache.search_region["left"] - self._X_OFFSET
-        pos_y = self.coords_cache.search_region["top"] - self.top_padding
+        pos_y = self.coords_cache.search_region["top"] - top_padding
         
         self.root.geometry(f"{self.w}x{self.h}+{pos_x}+{pos_y}")
         self.root.deiconify()

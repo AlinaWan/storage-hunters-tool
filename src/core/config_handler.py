@@ -102,7 +102,7 @@ class ConfigHandler:
             "hotkey_settings": {
                 "toggle": { "mod": Config.TOGGLE_MOD, "key": Config.TOGGLE_KEY },
                 "exit":   { "mod": Config.EXIT_MOD,   "key": Config.EXIT_KEY   },
-                "menu":   { "menu_mod": Config.MENU_MOD, "key": Config.MENU_KEY },
+                "menu":   { "mod": Config.MENU_MOD,   "key": Config.MENU_KEY },
                 "debug":  { "mod": Config.DEBUG_MOD,  "key": Config.DEBUG_KEY  }
             }
         }

@@ -3,10 +3,14 @@ __version__ = "1.0.0"
 __author__ = "Riri"
 __license__ = "MIT"
 
+import faulthandler
+faulthandler.enable()
+
 import atexit
 import signal
 import time
 import threading
+from _tkinter import TclError
 from typing import final as sealed
 
 import cv2
@@ -513,6 +517,28 @@ class Program:
                 NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
             )
             raise
+
+        except TclError as e:
+            if "bad geometry specifier" in str(e):
+                SafeMessageBox.show_message_box_sync(
+                    "Tcl raised bad geometry specifier during runtime:\n\n" +
+                    f"{e}\n\n" +
+                    "This is usually because a configuration setting is too negative, and " +
+                    "Tcl does not allow negative width or height in geometry strings.\n\n" + 
+                    "The program will now exit.",
+                    "Fatal Error",
+                    NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
+                )
+                raise
+            else:
+                SafeMessageBox.show_message_box_sync(
+                    "A Tcl error occurred during runtime:\n\n" +
+                    f"{e}\n\n" +
+                    "The program will now exit.",
+                    "Fatal Error",
+                    NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
+                )
+                raise
 
         except Exception as e:
             SafeMessageBox.show_message_box_sync(

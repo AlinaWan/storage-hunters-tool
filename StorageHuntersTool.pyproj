@@ -26,16 +26,17 @@
     <Compile Include="src\core\config.py" />
     <Compile Include="src\core\config_handler.py" />
     <Compile Include="src\core\constants.py" />
-	<Compile Include="src\core\interfaces.py" />
+    <Compile Include="src\core\interfaces.py" />
     <Compile Include="src\core\native_methods.py" />
     <Compile Include="src\core\__init__.py" />
-	<Compile Include="src\dtos\screen_coordinate_cache_dto.py" />
-	<Compile Include="src\dtos\__init__.py" />
+	<Compile Include="src\dtos\config_runtime_state_dto.py" />
+    <Compile Include="src\dtos\screen_coordinate_cache_dto.py" />
+    <Compile Include="src\dtos\__init__.py" />
     <Compile Include="src\services\file_watcher.py" />
     <Compile Include="src\services\hotkey_listener.py" />
     <Compile Include="src\services\recache_manager.py" />
     <Compile Include="src\services\__init__.py" />
-	<Compile Include="src\ui\debug_window.py" />
+    <Compile Include="src\ui\debug_window.py" />
     <Compile Include="src\ui\menu_overlay.py" />
     <Compile Include="src\ui\scan_area_overlay.py" />
     <Compile Include="src\ui\tooltip_marker.py" />
@@ -49,6 +50,7 @@
   <ItemGroup>
     <Folder Include="src" />
     <Folder Include="src\core" />
+    <Folder Include="src\dtos\" />
     <Folder Include="src\services" />
     <Folder Include="src\ui" />
     <Folder Include="src\utils" />
