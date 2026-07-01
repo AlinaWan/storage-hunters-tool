@@ -18,6 +18,7 @@ from core.config import Config
 from core.config_handler import ConfigHandler
 from core.constants import Constants
 from core.native_methods import NativeMethods
+from dtos.screen_coordinate_cache_dto import ScreenCoordinateCacheDto
 from services.hotkey_listener import HotkeyListener
 from services.recache_manager import RecacheManager
 from ui.debug_window import DebugWindow
@@ -36,6 +37,7 @@ class Program:
         self.last_time = None
         self.last_click_time = 0.0
         self.velocity = 0.0
+        self.coords_cache = ScreenCoordinateCacheDto()
 
         self.click_tracking = None
         self.avg_latency = 0.0
@@ -90,8 +92,18 @@ class Program:
 
     def _recache(self):
         with self._cache_lock:
+            region = Config.SEARCH_REGION.copy()
+            if Config.USE_FULLSCREEN_OFFSET:
+                region["top"] += Config.FULLSCREEN_Y_OFFSET
+            self.coords_cache.search_region = region
+
             if hasattr(self, "area_visual"):
-                self.area_visual.update_dimensions(Config.SEARCH_REGION, 1.0)
+                self.area_visual.update_dimensions(self.coords_cache.search_region, 1.0)
+
+            click = Config.CLICK_COORDINATE.copy()
+            if Config.USE_FULLSCREEN_OFFSET:
+                click["y"] += Config.FULLSCREEN_Y_OFFSET
+            self.coords_cache.click_coordinate = click
 
             self._update_hotkey_registration()
 
@@ -148,28 +160,18 @@ class Program:
                 self._hotkey_registering = False
 
     def run(self):
-        marker = TooltipMarker()
+        marker = TooltipMarker(self.coords_cache)
         self.menu = MenuOverlay(ConfigHandler.load_config, ConfigHandler.edit_config, ConfigHandler.open_help)
 
-        region_w = Config.SEARCH_REGION["width"]
-        region_h = Config.SEARCH_REGION["height"]
-        self.debug_window = DebugWindow(region_w, region_h, lambda: self.debug_window.toggle_visibility())
-        self.area_visual = ScanAreaOverlay(Config.SEARCH_REGION, 1.0)
-
         self._recache()
+
+        self.debug_window = DebugWindow(self.coords_cache, lambda: self.debug_window.toggle_visibility())
+        self.area_visual = ScanAreaOverlay(self.coords_cache.search_region, 1.0)
 
         print("[Program::Run] Initialized.")
 
         # initialize bettercam with BGRA output format to match OpenCV pipeline
         camera = bettercam.create(output_color="BGRA")
-
-        # convert the mss-style dict (left, top, width, height) to bettercam tuple format (left, top, right, bottom)
-        region = (
-            Config.SEARCH_REGION["left"],
-            Config.SEARCH_REGION["top"],
-            Config.SEARCH_REGION["left"] + Config.SEARCH_REGION["width"],
-            Config.SEARCH_REGION["top"] + Config.SEARCH_REGION["height"]
-        )
 
         while not self.should_exit:
             self.recache_manager.flush()
@@ -179,6 +181,14 @@ class Program:
                 self.menu.update()
 
             now = time.perf_counter()
+
+            # convert the mss-style dict (left, top, width, height) to bettercam tuple format (left, top, right, bottom)
+            region = (
+                self.coords_cache.search_region["left"],
+                self.coords_cache.search_region["top"],
+                self.coords_cache.search_region["left"] + self.coords_cache.search_region["width"],
+                self.coords_cache.search_region["top"] + self.coords_cache.search_region["height"]
+            )
 
             # Grab frame using bettercam
             frame = camera.grab(region=region)
@@ -308,7 +318,7 @@ class Program:
                 )
 
             if line_center_x is not None:
-                global_cx = Config.SEARCH_REGION["left"] + line_center_x
+                global_cx = self.coords_cache.search_region["left"] + line_center_x
                 velocity_pps = 0.0
                     
                 if self.last_x is not None and self.last_time is not None:
@@ -413,7 +423,7 @@ class Program:
                         if (now - self.last_click_time) >= cooldown_seconds:
                             if self.is_active:
                                 NativeMethods.move_mouse(
-                                    **Config.CLICK_COORDINATE,
+                                    **self.coords_cache.click_coordinate,
                                     relative=False
                                 )
                                 NativeMethods.move_mouse(1, 1, relative=True)

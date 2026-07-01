@@ -8,7 +8,9 @@ from core.config import Config
 
 @sealed
 class DebugWindow:
-    def __init__(self, width: int, height: int, on_close_callback):
+    def __init__(self, coords_cache, on_close_callback):
+        self.coords_cache = coords_cache
+        
         self.root = tk.Toplevel()
         self.root.title("Debug Mask")
         self.root.attributes("-topmost", True)
@@ -17,8 +19,8 @@ class DebugWindow:
         self._is_actually_visible = False
         self.pending_toggle = False
         
-        debug_width = width
-        debug_height = (height * 3) + 26 * 5 + 5 # about height/label, 26px/info line
+        debug_width = self.coords_cache.search_region["width"]
+        debug_height = (self.coords_cache.search_region["height"] * 3) + 26 * 5 + 5 # about height/label, 26px/info line
         self.root.geometry(f"{debug_width}x{debug_height}")
         self.root.configure(bg="black")
         
@@ -88,7 +90,7 @@ class DebugWindow:
             mask_uint8 = (mask_np * 255).astype("uint8")
             mask_uint8 = cv2.resize(
                 mask_uint8,
-                (Config.SEARCH_REGION["width"], Config.SEARCH_REGION["height"]),
+                (self.coords_cache.search_region["width"], self.coords_cache.search_region["height"]),
                 interpolation=cv2.INTER_NEAREST
             )
             img_pil = Image.fromarray(mask_uint8)
@@ -144,7 +146,7 @@ class DebugWindow:
                     
                 freeze_canvas = cv2.resize(
                     freeze_canvas,
-                    (Config.SEARCH_REGION["width"], Config.SEARCH_REGION["height"]),
+                    (self.coords_cache.search_region["width"], self.coords_cache.search_region["height"]),
                     interpolation=cv2.INTER_NEAREST
                 )
                 
@@ -156,7 +158,7 @@ class DebugWindow:
             else:
                 # initialize as black frame
                 black_frame = np.zeros(
-                    (Config.SEARCH_REGION["height"], Config.SEARCH_REGION["width"], 3), 
+                    (self.coords_cache.search_region["height"], self.coords_cache.search_region["width"], 3), 
                     dtype=np.uint8
                 )
                 img_pil3 = Image.fromarray(black_frame)
@@ -166,7 +168,7 @@ class DebugWindow:
 
             colored_mask = cv2.resize(
                 colored_mask,
-                (Config.SEARCH_REGION["width"], Config.SEARCH_REGION["height"]),
+                (self.coords_cache.search_region["width"], self.coords_cache.search_region["height"]),
                 interpolation=cv2.INTER_NEAREST
             )
             

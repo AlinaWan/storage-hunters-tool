@@ -6,10 +6,16 @@ from core.constants import Constants
 class Config:
 
     CLICK_COOLDOWN_MS = 250
-    CLICK_COORDINATE = {"x": 960, "y": 860}
-    SEARCH_REGION = {"top": 752, "left": 614, "width": 692, "height": 57}
-    MAX_LINE_WIDTH_PX = 20
-    LINE_BLIND_BUFFER_PX = 10
+    CLICK_COORDINATE = {"x": int(Constants.SCREEN_WIDTH  * (960 / 1920)),
+                        "y": int(Constants.SCREEN_HEIGHT * (860 / 1080))}
+    SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (752 / 1080)),
+                     "left":   int(Constants.SCREEN_WIDTH  * (614 / 1920)),
+                     "width":  int(Constants.SCREEN_WIDTH  * (692 / 1920)),
+                     "height": int(Constants.SCREEN_HEIGHT * (57 / 1080))}
+    USE_FULLSCREEN_OFFSET = False
+    FULLSCREEN_Y_OFFSET = int(Constants.SCREEN_HEIGHT * (40 / 1080))
+    MAX_LINE_WIDTH_PX = int(Constants.SCREEN_WIDTH * (20 / 1920))
+    LINE_BLIND_BUFFER_PX = int(Constants.SCREEN_WIDTH * (10 / 1920))
     MIN_TARGET_WIDTH_PCT = 5.0
     MIN_TARGET_HEIGHT_PCT = 90.0
     ALLOW_TARGET_BLEED = True

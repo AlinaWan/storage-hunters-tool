@@ -38,6 +38,8 @@ class ConfigHandler:
             "width": evaluator.evaluate(a["search_region"]["width"]),
             "height": evaluator.evaluate(a["search_region"]["height"]),
         }
+        Config.USE_FULLSCREEN_OFFSET = evaluator.evaluate(a["use_fullscreen_offset"])
+        Config.FULLSCREEN_Y_OFFSET = evaluator.evaluate(a["fullscreen_y_offset"])
         Config.MAX_LINE_WIDTH_PX = evaluator.evaluate(a["max_line_width_px"])
         Config.LINE_BLIND_BUFFER_PX = evaluator.evaluate(a["line_blind_buffer_px"])
         Config.MIN_TARGET_WIDTH_PCT = float(evaluator.evaluate(a["min_target_width_pct"]))
@@ -89,6 +91,8 @@ class ConfigHandler:
                 "click_cooldown_ms":           Config.CLICK_COOLDOWN_MS,
                 "click_coordinate":            Config.CLICK_COORDINATE,
                 "search_region":               Config.SEARCH_REGION,
+                "use_fullscreen_offset":       Config.USE_FULLSCREEN_OFFSET,
+                "fullscreen_y_offset":         Config.FULLSCREEN_Y_OFFSET,
                 "max_line_width_px":           Config.MAX_LINE_WIDTH_PX,
                 "line_blind_buffer_px":        Config.LINE_BLIND_BUFFER_PX,
                 "min_target_width_pct":        Config.MIN_TARGET_WIDTH_PCT,

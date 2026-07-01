@@ -1,6 +1,5 @@
 import tkinter as tk
 from typing import final as sealed
-
 from core.config import Config
 
 @sealed
@@ -9,24 +8,36 @@ class TooltipMarker:
     _X_OFFSET = 20
     _Y_OFFSET = Config.TOOLTIP_MARKER_Y_OFFSET_PX
 
-    def __init__(self):
+    def __init__(self, coords_cache):
+        self.coords_cache = coords_cache
+        
         self.root = tk.Tk()
         self.root.withdraw()
         self.root.overrideredirect(True)
         self.root.attributes("-topmost", True, "-transparentcolor", "black")
 
         self.top_padding = self._Y_OFFSET + 20
-        self.w = Config.SEARCH_REGION["width"] + 40
-        self.h = Config.SEARCH_REGION["height"] + self.top_padding + 50
+        
+        # Start placeholders; these will be recalculated dynamically during updates
+        self.w = 100
+        self.h = 100
         
         self.canvas = tk.Canvas(self.root, width=self.w, height=self.h, bg="black", highlightthickness=0)
         self.canvas.pack()
 
         self.target_lines = []
         self.slider_line = None
-        self.debug_text = self.canvas.create_text(10, self.h - 60, anchor="nw", fill="lime", font=("Consolas", 9))
+        self.debug_text = self.canvas.create_text(10, 0, anchor="nw", fill="lime", font=("Consolas", 9))
 
     def update_overlay(self, line_coords, target_coords, velocity=0.0, confidence=0.0):
+        # dynamically recalculate dimensions based on active cache values
+        self.w = self.coords_cache.search_region["width"] + 40
+        self.h = self.coords_cache.search_region["height"] + self.top_padding + 50
+        
+        # resize the canvas widget and push text position lower down
+        self.canvas.configure(width=self.w, height=self.h)
+        self.canvas.coords(self.debug_text, 10, self.h - 40)
+
         if self.target_lines:
             for line in self.target_lines:
                 self.canvas.delete(line)
@@ -74,8 +85,8 @@ class TooltipMarker:
         )
         self.canvas.itemconfig(self.debug_text, text=logic_str)
 
-        pos_x = Config.SEARCH_REGION["left"] - self._X_OFFSET
-        pos_y = Config.SEARCH_REGION["top"] - self.top_padding
+        pos_x = self.coords_cache.search_region["left"] - self._X_OFFSET
+        pos_y = self.coords_cache.search_region["top"] - self.top_padding
         
         self.root.geometry(f"{self.w}x{self.h}+{pos_x}+{pos_y}")
         self.root.deiconify()
