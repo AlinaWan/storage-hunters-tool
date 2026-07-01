@@ -32,7 +32,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 
 ## 📥 Installation
 
-### 📦 Prerequites
+### 📦 Sine Qua Non
 
 - Windows 10 or 11
 - Python 3.10 or higher
@@ -44,7 +44,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
    pip install -r requirements.txt
    ```
 
-3.  Initialize the script via terminal:
+2.  Initialize the script via terminal:
     ```powershell
     python src\program.pyw
     ```
