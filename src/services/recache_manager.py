@@ -1,12 +1,12 @@
-from typing import final as sealed, Callable
+from typing import final as sealed, Callable as Action
 
 @sealed
 class RecacheManager:
     def __init__(self):
-        self._callbacks: list[Callable[[], None]] = []
+        self._callbacks: list[Action[[], None]] = []
         self._pending = False
 
-    def register(self, callback: Callable[[], None]):
+    def register(self, callback: Action[[], None]):
         self._callbacks.append(callback)
 
     def trigger(self):

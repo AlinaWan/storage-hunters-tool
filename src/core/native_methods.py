@@ -67,6 +67,7 @@ class HARDWAREINPUT(ctypes.Structure):
         ("wParamH", wintypes.WORD),
     ]
 
+@sealed
 class INPUT_UNION(ctypes.Union):
     _fields_ = [
         ("ki", KEYBDINPUT),
