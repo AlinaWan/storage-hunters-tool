@@ -4,7 +4,6 @@ from typing import final as sealed
 import cv2
 import numpy as np
 from PIL import Image, ImageTk
-from core.config import Config
 
 @sealed
 class DebugWindow:

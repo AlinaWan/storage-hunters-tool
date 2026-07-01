@@ -1,7 +1,6 @@
 import tkinter as tk
 from typing import final as sealed
 
-from core.config_handler import ConfigHandler
 from core.native_methods import NativeMethods
 
 @sealed
@@ -113,9 +112,9 @@ class MenuOverlay:
             return container
 
         # Buttons
-        create_button(btn_frame, "📥", "Import Config", "#4dabf7", ConfigHandler.load_config)
-        create_button(btn_frame, "✏️", "Edit Config", "#ff922b", ConfigHandler.edit_config)
-        create_button(btn_frame, "❓", "Get Help", "#f74d4d", ConfigHandler.open_help)
+        create_button(btn_frame, "📥", "Import Config", "#4dabf7", load_callback)
+        create_button(btn_frame, "✏️", "Edit Config", "#ff922b", edit_callback)
+        create_button(btn_frame, "❓", "Get Help", "#f74d4d", save_callback)
 
         self.visible = False
         self.toggle_requested = False

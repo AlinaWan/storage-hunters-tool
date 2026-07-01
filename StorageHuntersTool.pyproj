@@ -29,6 +29,8 @@
 	<Compile Include="src\core\interfaces.py" />
     <Compile Include="src\core\native_methods.py" />
     <Compile Include="src\core\__init__.py" />
+	<Compile Include="src\dtos\screen_coordinate_cache_dto.py" />
+	<Compile Include="src\dtos\__init__.py" />
     <Compile Include="src\services\file_watcher.py" />
     <Compile Include="src\services\hotkey_listener.py" />
     <Compile Include="src\services\recache_manager.py" />

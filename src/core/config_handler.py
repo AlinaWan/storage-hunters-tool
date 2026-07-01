@@ -8,13 +8,8 @@ from typing import final as sealed
 
 from core.config import Config
 from core.constants import Constants
-from services.file_watcher import FileWatcher
+from dtos.config_runtime_state_dto import ConfigRuntimeStateDto
 from utils.math_evaluator import MathEvaluator
-
-config_watcher = FileWatcher()
-current_config_path = None
-config_data = None
-recache_manager = None
 
 evaluator = MathEvaluator({
     "SCREEN_WIDTH": Constants.SCREEN_WIDTH,
@@ -23,45 +18,46 @@ evaluator = MathEvaluator({
 
 @sealed
 class ConfigHandler:
+    def __init__(self, state: ConfigRuntimeStateDto):
+        self.state = state
+        self.evaluator = evaluator
 
-    @staticmethod
-    def apply_config(data):
+    def apply_config(self, data):
         a = data["automation_settings"]
-        Config.CLICK_COOLDOWN_MS = evaluator.evaluate(a["click_cooldown_ms"])
+        Config.CLICK_COOLDOWN_MS = self.evaluator.evaluate(a["click_cooldown_ms"])
         Config.CLICK_COORDINATE = {
-            "x": evaluator.evaluate(a["click_coordinate"]["x"]),
-            "y": evaluator.evaluate(a["click_coordinate"]["y"]),
+            "x": self.evaluator.evaluate(a["click_coordinate"]["x"]),
+            "y": self.evaluator.evaluate(a["click_coordinate"]["y"]),
         }
         Config.SEARCH_REGION = {
-            "top": evaluator.evaluate(a["search_region"]["top"]),
-            "left": evaluator.evaluate(a["search_region"]["left"]),
-            "width": evaluator.evaluate(a["search_region"]["width"]),
-            "height": evaluator.evaluate(a["search_region"]["height"]),
+            "top": self.evaluator.evaluate(a["search_region"]["top"]),
+            "left": self.evaluator.evaluate(a["search_region"]["left"]),
+            "width": self.evaluator.evaluate(a["search_region"]["width"]),
+            "height": self.evaluator.evaluate(a["search_region"]["height"]),
         }
-        Config.USE_FULLSCREEN_OFFSET = evaluator.evaluate(a["use_fullscreen_offset"])
-        Config.FULLSCREEN_Y_OFFSET = evaluator.evaluate(a["fullscreen_y_offset"])
-        Config.MAX_LINE_WIDTH_PX = evaluator.evaluate(a["max_line_width_px"])
-        Config.LINE_BLIND_BUFFER_PX = evaluator.evaluate(a["line_blind_buffer_px"])
-        Config.MIN_TARGET_WIDTH_PCT = float(evaluator.evaluate(a["min_target_width_pct"]))
-        Config.MIN_TARGET_HEIGHT_PCT = float(evaluator.evaluate(a["min_target_height_pct"]))
-        Config.ALLOW_TARGET_BLEED = evaluator.evaluate(a["allow_target_bleed"])
-        Config.TOOLTIP_MARKER_Y_OFFSET_PX = evaluator.evaluate(a["tooltip_marker_y_offset"])
-        Config.USE_PREDICTIVE_COLLISION = evaluator.evaluate(a["use_predictive_collision"])
-        Config.PREDICTIVE_COLLISION_BUFFER = float(evaluator.evaluate(a["predictive_collision_buffer"]))
-        Config.MAX_PREDICTION_LATENCY_MS = float(evaluator.evaluate(a["max_prediction_latency_ms"]))
+        Config.USE_FULLSCREEN_OFFSET = self.evaluator.evaluate(a["use_fullscreen_offset"])
+        Config.FULLSCREEN_Y_OFFSET = self.evaluator.evaluate(a["fullscreen_y_offset"])
+        Config.MAX_LINE_WIDTH_PX = self.evaluator.evaluate(a["max_line_width_px"])
+        Config.LINE_BLIND_BUFFER_PX = self.evaluator.evaluate(a["line_blind_buffer_px"])
+        Config.MIN_TARGET_WIDTH_PCT = float(self.evaluator.evaluate(a["min_target_width_pct"]))
+        Config.MIN_TARGET_HEIGHT_PCT = float(self.evaluator.evaluate(a["min_target_height_pct"]))
+        Config.ALLOW_TARGET_BLEED = self.evaluator.evaluate(a["allow_target_bleed"])
+        Config.TOOLTIP_MARKER_Y_OFFSET_PX = self.evaluator.evaluate(a["tooltip_marker_y_offset"])
+        Config.USE_PREDICTIVE_COLLISION = self.evaluator.evaluate(a["use_predictive_collision"])
+        Config.PREDICTIVE_COLLISION_BUFFER = float(self.evaluator.evaluate(a["predictive_collision_buffer"]))
+        Config.MAX_PREDICTION_LATENCY_MS = float(self.evaluator.evaluate(a["max_prediction_latency_ms"]))
 
-        h =data["hotkey_settings"]
-        Config.TOGGLE_MOD = evaluator.evaluate(h["toggle"]["mod"])
-        Config.TOGGLE_KEY = evaluator.evaluate(h["toggle"]["key"])
-        Config.EXIT_MOD = evaluator.evaluate(h["exit"]["mod"])
-        Config.EXIT_KEY = evaluator.evaluate(h["exit"]["key"])
-        Config.MENU_MOD = evaluator.evaluate(h["menu"]["mod"])
-        Config.MENU_KEY = evaluator.evaluate(h["menu"]["key"])
-        Config.DEBUG_MOD = evaluator.evaluate(h["debug"]["mod"])
-        Config.DEBUG_KEY = evaluator.evaluate(h["debug"]["key"])
+        h = data["hotkey_settings"]
+        Config.TOGGLE_MOD = self.evaluator.evaluate(h["toggle"]["mod"])
+        Config.TOGGLE_KEY = self.evaluator.evaluate(h["toggle"]["key"])
+        Config.EXIT_MOD = self.evaluator.evaluate(h["exit"]["mod"])
+        Config.EXIT_KEY = self.evaluator.evaluate(h["exit"]["key"])
+        Config.MENU_MOD = self.evaluator.evaluate(h["menu"]["mod"])
+        Config.MENU_KEY = self.evaluator.evaluate(h["menu"]["key"])
+        Config.DEBUG_MOD = self.evaluator.evaluate(h["debug"]["mod"])
+        Config.DEBUG_KEY = self.evaluator.evaluate(h["debug"]["key"])
 
-    @staticmethod
-    def _build_current_config():
+    def _build_current_config(self):
         return {
             "description": [
                 "----------------- Storage Hunters Tool Configuration ----------------",
@@ -106,31 +102,27 @@ class ConfigHandler:
             "hotkey_settings": {
                 "toggle": { "mod": Config.TOGGLE_MOD, "key": Config.TOGGLE_KEY },
                 "exit":   { "mod": Config.EXIT_MOD,   "key": Config.EXIT_KEY   },
-                "menu":   { "mod": Config.MENU_MOD,   "key": Config.MENU_KEY   },
+                "menu":   { "menu_mod": Config.MENU_MOD, "key": Config.MENU_KEY },
                 "debug":  { "mod": Config.DEBUG_MOD,  "key": Config.DEBUG_KEY  }
             }
         }
 
-    @staticmethod
-    def _reload_from_disk(path):
+    def _reload_from_disk(self, path):
         try:
             with open(path, "r") as f:
                 data = json.load(f)
 
-            ConfigHandler.apply_config(data)
+            self.apply_config(data)
 
-            if recache_manager:
-                recache_manager.trigger()
+            if self.state.recache_manager:
+                self.state.recache_manager.trigger()
 
             print(f"[ConfigHandler::Reload] Live-reloaded: {os.path.basename(path)}")
 
         except Exception as e:
             print(f"[ConfigHandler::Reload] Reload error: {e}")
 
-    @staticmethod
-    def load_config():
-        global current_config_path, config_data
-
+    def load_config(self):
         path = filedialog.askopenfilename(
             initialdir=Constants.SCRIPT_DIR,
             filetypes=[("JSON Config", "*.json")]
@@ -139,21 +131,15 @@ class ConfigHandler:
         if not path:
             return
 
-        # this prevents multiple threads from watching different files at once.
-        config_watcher.stop()
+        self.state.config_watcher.stop()
         
-        ConfigHandler._reload_from_disk(path)
-        current_config_path = path
+        self._reload_from_disk(path)
+        self.state.current_config_path = path
 
-        # Start the watcher instance
-        config_watcher.start(path, ConfigHandler._reload_from_disk)
+        self.state.config_watcher.start(path, self._reload_from_disk)
 
-    @staticmethod
-    def edit_config():
-        global current_config_path, config_data
-
-        # 1. If no file is loaded, create one first
-        if not current_config_path:
+    def edit_config(self):
+        if not self.state.current_config_path:
             timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
             default_name = f"Storage_Hunters_Tool_Config_{timestamp}.json"
 
@@ -165,31 +151,24 @@ class ConfigHandler:
             )
 
             if not path:
-                return # User cancelled the dialog
+                return
 
-            # 2. Write the current script settings to the new file
-            config = ConfigHandler._build_current_config()
+            config = self._build_current_config()
             with open(path, "w") as f:
                 json.dump(config, f, indent=4)
 
-            # 3. Point the script to this new file
-            current_config_path = path
+            self.state.current_config_path = path
             print(f"[ConfigHandler::Edit] Created and loaded config: {path}")
 
-        # 4. Open the file (either the existing one or the one just created) in Notepad
-        subprocess.Popen([Constants.TEXT_EDITOR_PATH, current_config_path])
-        print(f"[ConfigHandler::Edit] Opened {current_config_path} with {Constants.TEXT_EDITOR_PATH}.")
+        subprocess.Popen([Constants.TEXT_EDITOR_PATH, self.state.current_config_path])
+        print(f"[ConfigHandler::Edit] Opened {self.state.current_config_path} with {Constants.TEXT_EDITOR_PATH}.")
 
-        # 5. Ensure the watcher is running so edits are applied live
-        if config_watcher._thread is None or not config_watcher._thread.is_alive():
-            config_watcher.start(current_config_path, ConfigHandler._reload_from_disk)
+        if self.state.config_watcher._thread is None or not self.state.config_watcher._thread.is_alive():
+            self.state.config_watcher.start(self.state.current_config_path, self._reload_from_disk)
 
-    @staticmethod
-    def open_help():
+    def open_help(self):
         github_url = f"{Constants.GITHUB_URL}#readme"
         webbrowser.open(github_url)
 
-    @staticmethod
-    def set_recache_manager(manager):
-        global recache_manager
-        recache_manager = manager
+    def set_recache_manager(self, manager):
+        self.state.recache_manager = manager

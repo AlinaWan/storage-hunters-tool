@@ -4,7 +4,6 @@ __author__ = "Riri"
 __license__ = "MIT"
 
 import atexit
-import importlib
 import signal
 import time
 import threading
@@ -18,6 +17,7 @@ from core.config import Config
 from core.config_handler import ConfigHandler
 from core.constants import Constants
 from core.native_methods import NativeMethods
+from dtos.config_runtime_state_dto import ConfigRuntimeStateDto
 from dtos.screen_coordinate_cache_dto import ScreenCoordinateCacheDto
 from services.hotkey_listener import HotkeyListener
 from services.recache_manager import RecacheManager
@@ -47,10 +47,11 @@ class Program:
         self._hotkey_register_lock = threading.Lock()
         self._hotkey_registering = False
 
-        self._cache_lock = threading.Lock()
+        self.config_state = ConfigRuntimeStateDto()
+        self.config_handler = ConfigHandler(self.config_state)
         self.recache_manager = RecacheManager()
-        ConfigHandler.set_recache_manager(self.recache_manager)
-
+        self.config_handler.set_recache_manager(self.recache_manager)
+        self._cache_lock = threading.Lock()
         # values that need recache
         self.last_hotkey_config = {
             "toggle": (Config.TOGGLE_MOD, Config.TOGGLE_KEY),
@@ -58,7 +59,6 @@ class Program:
             "menu": (Config.MENU_MOD, Config.MENU_KEY),
             "debug": (Config.DEBUG_MOD, Config.DEBUG_KEY)
         }
-
         self.recache_manager.register(self._recache)
 
     def toggle_logic(self):
@@ -161,7 +161,11 @@ class Program:
 
     def run(self):
         marker = TooltipMarker(self.coords_cache)
-        self.menu = MenuOverlay(ConfigHandler.load_config, ConfigHandler.edit_config, ConfigHandler.open_help)
+        self.menu = MenuOverlay(
+            self.config_handler.load_config, 
+            self.config_handler.edit_config, 
+            self.config_handler.open_help
+        )
 
         self._recache()
 
@@ -469,8 +473,8 @@ class Program:
         if self.hotkey_listener and self.hotkey_listener.is_alive():
             self.hotkey_listener.dispose()
 
-        if config_watcher := getattr(importlib.import_module('core.config_handler'), 'config_watcher', None):
-            config_watcher.dispose()
+        if hasattr(self, 'config_state') and self.config_state.config_watcher:
+            self.config_state.config_watcher.dispose()
 
         if self.mutex_handle:
             NativeMethods.release_mutex(self.mutex_handle)
