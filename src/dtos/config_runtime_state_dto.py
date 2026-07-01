@@ -1,4 +1,4 @@
-from typing import Any as Dynamic, final as sealed
+from typing import Any, final as sealed
 
 from services.file_watcher import FileWatcher
 
@@ -8,5 +8,5 @@ class ConfigRuntimeStateDto:
 
         self.config_watcher: FileWatcher = FileWatcher()
         self.current_config_path: str | None = None
-        self.config_data: Dynamic = None
-        self.recache_manager: Dynamic = None
+        self.config_data: Any = None
+        self.recache_manager: Any = None

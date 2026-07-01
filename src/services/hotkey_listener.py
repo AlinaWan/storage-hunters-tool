@@ -64,8 +64,8 @@ class HotkeyListener(threading.Thread, IDisposable):
                 self._registered_hotkeys.append(hk_id)
                 registered += 1
             else:
-                print(
-                    f"[HotkeyListener] Failed to register "
+                self.logger.error(
+                    f"Failed to register "
                     f"{name} (ID: {hk_id})"
                 )
 

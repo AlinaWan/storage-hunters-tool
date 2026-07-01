@@ -8,14 +8,29 @@ Instead of calling NativeMethods.message_box():
 
 Depends on message_box_worker.py in the same directory.
 """
+import logging
 import os
 import sys
 import subprocess
 import threading
 
-class SafeMessageBox:
+from utils.logger_mixin import LoggerMixin
+
+class SafeMessageBox(LoggerMixin):
+    # this is a static class so we have to pass the logger through a small hack
+    @property
+    def logger(self):
+        return logging.getLogger("SafeMessageBox")
+
+    @classmethod
+    def _get_logger(cls):
+        if cls._factory is None:
+            return logging.getLogger(f"{cls.__module__}.{cls.__qualname__}")
+        name = f"{cls.__module__}.{cls.__qualname__}"
+        return cls._factory.create_logger(name)
+
     @staticmethod
-    def show_message_box_async(text, title, flags, callback):
+    def show_message_box_async(cls, text, title, flags, callback):
         def worker():
             try:
                 worker_path = os.path.join(
@@ -39,21 +54,21 @@ class SafeMessageBox:
                 stdout, stderr = proc.communicate()
 
                 if proc.returncode != 0:
-                    print("[SafeMessageBox] Worker crashed:", stderr)
+                    cls._get_logger().error(f"Worker crashed: {stderr}")
                     callback(None)
                     return
 
                 result = int(stdout.strip())
                 callback(result)
 
-            except Exception as e:
-                print(f"[SafeMessageBox] Failed: {e}")
+            except Exception as _:
+                cls._get_logger().exception("Failed to execute worker")
                 callback(None)
 
         threading.Thread(target=worker, daemon=True).start()
 
     @staticmethod
-    def show_message_box_sync(text, title, flags):
+    def show_message_box_sync(cls, text, title, flags):
         try:
             worker_path = os.path.join(
                 os.path.dirname(__file__),
@@ -76,11 +91,11 @@ class SafeMessageBox:
             stdout, stderr = proc.communicate()
 
             if proc.returncode != 0:
-                print("[SafeMessageBox] Worker crashed:", stderr)
+                cls._get_logger().error(f"Worker crashed: {stderr}")
                 return None
 
             return int(stdout.strip())
 
-        except Exception as e:
-            print(f"[SafeMessageBox] Failed: {e}")
+        except Exception as _:
+            cls._get_logger().exception("Failed to execute worker")
             return None

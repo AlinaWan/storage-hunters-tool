@@ -2,12 +2,21 @@ from pathlib import Path
 from typing import Final as ReadOnly, final as sealed
 
 from core.native_methods import NativeMethods
+from services.console_logger_provider import ConsoleLoggerProvider
+from services.file_logger_provider import FileLoggerProvider
+from utils.logging_formatter import LoggingFormatter
 
 @sealed
 class Constants:
 
     SCRIPT_DIR: ReadOnly = Path(__file__).resolve().parent.parent # src\ dir
     WINDOWS_DIR: ReadOnly = Path(NativeMethods.get_windows_directory())
+
+    CONSOLE_LOGGER_PROVIDER: ReadOnly = ConsoleLoggerProvider
+    FILE_LOGGER_PROVIDER: ReadOnly = FileLoggerProvider
+    LOGGING_FORMATTER: ReadOnly = LoggingFormatter
+    LOG_DIR: ReadOnly = "logs"
+    WRITE_LOGS: ReadOnly = False
 
     TEXT_EDITOR_PATH: ReadOnly = WINDOWS_DIR / "System32" / "notepad.exe"
 

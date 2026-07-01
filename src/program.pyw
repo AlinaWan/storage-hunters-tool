@@ -24,17 +24,21 @@ from core.native_methods import NativeMethods
 from dtos.config_runtime_state_dto import ConfigRuntimeStateDto
 from dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
 from dtos.screen_coordinate_cache_dto import ScreenCoordinateCacheDto
+from services.console_logger_provider import ConsoleLoggerProvider
 from services.discord_rpc_service import DiscordRpcService
 from services.hotkey_listener import HotkeyListener
+from services.logger_factory import LoggerFactory
 from services.recache_manager import RecacheManager
 from ui.debug_window import DebugWindow
 from ui.menu_overlay import MenuOverlay
 from ui.scan_area_overlay import ScanAreaOverlay
 from ui.tooltip_marker import TooltipMarker
+from utils.logger_mixin import LoggerMixin
+from utils.logging_formatter import LoggingFormatter
 from utils.safe_message_box import SafeMessageBox
 
 @sealed
-class Program:
+class Program(LoggerMixin):
     def __init__(self):
         self.menu = None
         self.should_exit = False
@@ -72,12 +76,12 @@ class Program:
 
     def toggle_logic(self):
         self.is_active = not self.is_active
-        print(f"[Program::Toggle] Toggled. Active: {self.is_active}")
+        self.logger.info(f"Active = {self.is_active}")
 
         self._sync_discord_rpc_presence()
 
     def exit_logic(self):
-        print("[Program::Exit] Exit signaled.")
+        self.logger.info("Exit signaled.")
         self.should_exit = True
 
     def debug_logic(self):
@@ -87,10 +91,10 @@ class Program:
     def _handle_hotkey_retry(self):
         def on_result(result):
             if result == 4:  # Retry clicked
-                print("[Program::Hotkey] Retrying hotkey registration...")
+                self.logger.info("Retrying hotkey registration...")
                 self._update_hotkey_registration()
             else:
-                print("[Program::Hotkey] User bypassed hotkey warning configuration.")
+                self.logger.info("User bypassed hotkey warning configuration.")
 
         SafeMessageBox.show_message_box_async(
             "Failed to register one or more hotkeys.\n\n"
@@ -117,7 +121,7 @@ class Program:
             dto.button_1_url = f"{Constants.GITHUB_URL}"
             self.discord_rpc_service.update_presence(dto)
         except Exception as e:
-            print(f"[Program::DiscordRpc] Error updating presence: {e}")
+            self.logger.info(f"Error updating presence: {e}")
 
     def _recache(self):
         with self._cache_lock:
@@ -137,32 +141,32 @@ class Program:
             self._update_hotkey_registration()
             self._update_discord_rpc_state()
 
-            print("[Program::Recache] Cache rebuilt")
+            self.logger.info("Cache built")
 
     def _update_discord_rpc_state(self):
         with self._discord_rpc_lock:
             if Config.ENABLE_DISCORD_RPC:
                 if self.discord_rpc_service is None:
-                    print("[Program::DiscordRpc] Initializing Discord RPC Service...")
+                    self.logger.info("Initializing Discord RPC Service...")
                     try:
                         self.discord_rpc_service = DiscordRpcService(client_id=f"{Constants.DISCORD_APPLICATION_ID}")
                         self.discord_rpc_service.connect()
                         self._sync_discord_rpc_presence()
                     except Exception as e:
-                        print(f"[Program::DiscordRpc] Connection failed: {e}")
+                        self.logger.info(f"Connection failed: {e}")
                         self.discord_rpc_service = None
             else:
                 if self.discord_rpc_service is not None:
                     try:
                         self.discord_rpc_service.dispose()
                     except Exception as e:
-                        print(f"[Program::DiscordRpc] Error during disposal: {e}")
+                        self.logger.info(f"Error during disposal: {e}")
                     finally:
                         self.discord_rpc_service = None
 
     def _update_hotkey_registration(self):
         if self._hotkey_registering:
-            print("[Program::Hotkey] Registration already in progress, skipping...")
+            self.logger.info("Registration already in progress, skipping...")
             return
 
         with self._hotkey_register_lock:
@@ -179,7 +183,7 @@ class Program:
                 if current_config == self.last_hotkey_config and self.hotkey_listener is not None:
                     return
 
-                print("[Program::Hotkey] Re-registering hotkeys...")
+                self.logger.info("Registering hotkeys...")
 
                 # stop old listener safely
                 if self.hotkey_listener:
@@ -223,7 +227,7 @@ class Program:
         self.debug_window = DebugWindow(self.coords_cache, lambda: self.debug_window.toggle_visibility())
         self.area_visual = ScanAreaOverlay(self.coords_cache.search_region, 1.0)
 
-        print("[Program::Run] Initialized.")
+        self.logger.info("Initialized.")
 
         # initialize bettercam with BGRA output format to match OpenCV pipeline
         camera = bettercam.create(output_color="BGRA")
@@ -425,18 +429,18 @@ class Program:
                                 # clicked too early
                                 if (track["fired_vel"] > 0 and track["final_x"] < tx1) or (track["fired_vel"] < 0 and track["final_x"] > tx2):
                                     self.avg_latency = (alpha_smooth * safe_measured_lag) + ((1.0 - alpha_smooth) * self.avg_latency)
-                                    print(f"[Program::Calibration] Clicked early. Corrected: {self.avg_latency * 1000.0:.1f}ms")
+                                    self.logger.info(f"Calibration: Clicked early. Corrected: {self.avg_latency * 1000.0:.1f}ms")
         
                                 # clicked too late
                                 elif (track["fired_vel"] > 0 and track["final_x"] > tx2) or (track["fired_vel"] < 0 and track["final_x"] < tx1):
                                     self.avg_latency = (alpha_smooth * safe_measured_lag) + ((1.0 - alpha_smooth) * self.avg_latency)
-                                    print(f"[Program::Calibration] Clicked late. Corrected: {self.avg_latency * 1000.0:.1f}ms")
+                                    self.logger.info(f"Calibration: Clicked late. Corrected: {self.avg_latency * 1000.0:.1f}ms")
         
                                 # hit case
                                 else:
                                     alpha_hit = 0.25
                                     self.avg_latency = (alpha_hit * safe_measured_lag) + ((1.0 - alpha_hit) * self.avg_latency)
-                                    print(f"[Program::Calibration] Engine Lag: {self.avg_latency * 1000.0:.1f}ms")
+                                    self.logger.info(f"Calibration: Engine Lag: {self.avg_latency * 1000.0:.1f}ms")
 
                         # Terminate tracking tracking until next click
                         self.click_tracking = None
@@ -523,6 +527,9 @@ class Program:
         marker.root.destroy()
 
     def current_domain_process_exit(self):
+        if getattr(self, 'logger_factory', None):
+            self.logger_factory.dispose()
+
         if self.hotkey_listener and self.hotkey_listener.is_alive():
             self.hotkey_listener.dispose()
 
@@ -553,8 +560,34 @@ class Program:
             )
             raise SystemExit(0)
 
+        # new logger factory
+        factory = LoggerFactory()
+
+        if __debug__:
+            formatter = Constants.LOGGING_FORMATTER()
+
+            provider = Constants.CONSOLE_LOGGER_PROVIDER
+            factory.add_provider(provider(formatter))
+
+            if Constants.WRITE_LOGS:
+                import os
+                from datetime import datetime, timezone
+
+                os.makedirs(Constants.LOG_DIR, exist_ok=True)
+                timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+                file_path = os.path.join(Constants.LOG_DIR, f"log-Storage_Hunters_Tool-{timestamp}.log")
+
+                provider = Constants.FILE_LOGGER_PROVIDER
+                factory.add_provider(provider(file_path=file_path, formatter=formatter))
+
+        LoggerMixin.set_factory(factory)
+
+        test_logger = factory.create_logger("Bootstrap")
+        test_logger.info("Logger initialized and working.")
+
         app = Program()
         app.mutex_handle = mutex
+        app.logger_factory = factory
         atexit.register(app.current_domain_process_exit)
         signal.signal(signal.SIGINT, lambda *_,: setattr(app, 'should_exit', True)) # exit cleanly
 

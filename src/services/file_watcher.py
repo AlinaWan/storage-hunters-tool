@@ -5,9 +5,10 @@ from typing import final as sealed
 
 from core.interfaces import IDisposable
 from core.native_methods import NativeMethods
+from utils.logger_mixin import LoggerMixin
 
 @sealed
-class FileWatcher(IDisposable):
+class FileWatcher(LoggerMixin, IDisposable):
     def __init__(self):
         self._thread = None
         self._cts = threading.Event()
@@ -25,7 +26,7 @@ class FileWatcher(IDisposable):
             self._thread.join(timeout=1.0)
 
         if self._thread and self._current_path is not None:
-            print(f"[FileWatcher] Watcher instance stopped for: {self._current_path}")
+            self.logger.info(f"Watcher instance stopped for: {self._current_path}")
 
         self._thread = None
 
@@ -76,7 +77,7 @@ class FileWatcher(IDisposable):
 
                 if result == 0: 
                     raw_name = NativeMethods.get_filename_from_notify_buffer(buffer)
-                    print(f"[FileWatcher] OS reported change in: {raw_name}")
+                    self.logger.info(f"OS reported change in: {raw_name}")
                     full_path = os.path.join(dir_to_watch, raw_name)
 
                     if is_dir or raw_name.lower() == target_name:

@@ -33,9 +33,11 @@
 	<Compile Include="src\dtos\discord_rpc_payload_dto.py" />
     <Compile Include="src\dtos\screen_coordinate_cache_dto.py" />
     <Compile Include="src\dtos\__init__.py" />
+	<Compile Include="src\services\console_logger_provider.py" />
 	<Compile Include="src\services\discord_rpc_service.py" />
     <Compile Include="src\services\file_watcher.py" />
     <Compile Include="src\services\hotkey_listener.py" />
+	<Compile Include="src\services\logger_factory.py" />
     <Compile Include="src\services\recache_manager.py" />
     <Compile Include="src\services\__init__.py" />
     <Compile Include="src\ui\debug_window.py" />
@@ -43,6 +45,8 @@
     <Compile Include="src\ui\scan_area_overlay.py" />
     <Compile Include="src\ui\tooltip_marker.py" />
     <Compile Include="src\ui\__init__.py" />
+	<Compile Include="src\utils\logger_mixin.py" />
+	<Compile Include="src\utils\logging_formatter.py" />
     <Compile Include="src\utils\math_evaluator.py" />
     <Compile Include="src\utils\message_box_worker.py" />
     <Compile Include="src\utils\safe_message_box.py" />

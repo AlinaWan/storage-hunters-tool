@@ -9,6 +9,7 @@ from typing import final as sealed
 from core.config import Config
 from core.constants import Constants
 from dtos.config_runtime_state_dto import ConfigRuntimeStateDto
+from utils.logger_mixin import LoggerMixin
 from utils.math_evaluator import MathEvaluator
 
 evaluator = MathEvaluator({
@@ -17,7 +18,7 @@ evaluator = MathEvaluator({
 })
 
 @sealed
-class ConfigHandler:
+class ConfigHandler(LoggerMixin):
     def __init__(self, state: ConfigRuntimeStateDto):
         self.state = state
         self.evaluator = evaluator
@@ -123,10 +124,10 @@ class ConfigHandler:
             if self.state.recache_manager:
                 self.state.recache_manager.trigger()
 
-            print(f"[ConfigHandler::Reload] Live-reloaded: {os.path.basename(path)}")
+            self.logger.info(f"Live-reloaded: {os.path.basename(path)}")
 
-        except Exception as e:
-            print(f"[ConfigHandler::Reload] Reload error: {e}")
+        except Exception as _:
+            self.logger.exception(f"Reload error for {os.path.basename(path)}")
 
     def load_config(self):
         path = filedialog.askopenfilename(
@@ -164,10 +165,10 @@ class ConfigHandler:
                 json.dump(config, f, indent=4)
 
             self.state.current_config_path = path
-            print(f"[ConfigHandler::Edit] Created and loaded config: {path}")
+            self.logger.info(f"Created and loaded config: {path}")
 
         subprocess.Popen([Constants.TEXT_EDITOR_PATH, self.state.current_config_path])
-        print(f"[ConfigHandler::Edit] Opened {self.state.current_config_path} with {Constants.TEXT_EDITOR_PATH}.")
+        self.logger.info(f"Opened {self.state.current_config_path} with {Constants.TEXT_EDITOR_PATH}.")
 
         if self.state.config_watcher._thread is None or not self.state.config_watcher._thread.is_alive():
             self.state.config_watcher.start(self.state.current_config_path, self._reload_from_disk)

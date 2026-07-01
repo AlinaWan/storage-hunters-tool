@@ -8,9 +8,10 @@ from typing import final as sealed
 from core.interfaces import IDisposable
 from core.native_methods import NativeMethods
 from dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
+from utils.logger_mixin import LoggerMixin
 
 @sealed
-class DiscordRpcService(IDisposable):
+class DiscordRpcService(LoggerMixin, IDisposable):
     def __init__(self, client_id: str):
         self.client_id = client_id
         self.handle = NativeMethods.INVALID_HANDLE_VALUE
@@ -30,6 +31,7 @@ class DiscordRpcService(IDisposable):
         handshake = json.dumps({"v": 1, "client_id": self.client_id}, separators=(",", ":"))
         self._send(0, handshake)
 
+    
     def _send(self, opcode: int, payload_str: str):
         if self.handle == NativeMethods.INVALID_HANDLE_VALUE:
             raise RuntimeError
@@ -49,18 +51,17 @@ class DiscordRpcService(IDisposable):
         # flush pipe
         response = NativeMethods.read_pipe(self.handle)
 
-        if __debug__:
-            if response:
-                json_data = response[8:].decode("utf-8")
-                print(f"[DiscordRpc::Emit] Pipe response received: {json_data}")
-            else:
-                print("[DiscordRpc::Emit] No response from pipe.")
+        if response:
+            json_data = response[8:].decode("utf-8")
+            self.logger.info(f"Emit: {json_data}")
+        else:
+            self.logger.info("No response from pipe.")
 
     def update_presence(self, dto: DiscordRpcPayloadDto):
         activity = {}
 
-        if dto.state: activity["state"] = dto.state
-        if dto.details: activity["details"] = dto.details
+        if dto.state: activity["state"] = dto.state # noqa: E701
+        if dto.details: activity["details"] = dto.details # noqa: E701
 
         if dto.use_timestamps:
             now = int(time.time())
@@ -73,11 +74,11 @@ class DiscordRpcService(IDisposable):
                 activity["timestamps"] = {"start": now}
 
         assets = {}
-        if dto.large_image_key: assets["large_image"] = dto.large_image_key
-        if dto.large_image_text: assets["large_text"] = dto.large_image_text
-        if dto.small_image_key: assets["small_image"] = dto.small_image_key
-        if dto.small_image_text: assets["small_text"] = dto.small_image_text
-        if assets: activity["assets"] = assets
+        if dto.large_image_key: assets["large_image"] = dto.large_image_key # noqa: E701
+        if dto.large_image_text: assets["large_text"] = dto.large_image_text # noqa: E701
+        if dto.small_image_key: assets["small_image"] = dto.small_image_key # noqa: E701
+        if dto.small_image_text: assets["small_text"] = dto.small_image_text # noqa: E701
+        if assets: activity["assets"] = assets # noqa: E701
 
         if dto.party_id:
             activity["party"] = {
@@ -86,16 +87,16 @@ class DiscordRpcService(IDisposable):
             }
 
         secrets = {}
-        if dto.join_secret: secrets["join"] = dto.join_secret
-        if dto.spectate_secret: secrets["spectate"] = dto.spectate_secret
-        if secrets: activity["secrets"] = secrets
+        if dto.join_secret: secrets["join"] = dto.join_secret # noqa: E701
+        if dto.spectate_secret: secrets["spectate"] = dto.spectate_secret # noqa: E701
+        if secrets: activity["secrets"] = secrets # noqa: E701
 
         buttons = []
         if dto.button_1_label and dto.button_1_url:
             buttons.append({"label": dto.button_1_label, "url": dto.button_1_url})
         if dto.button_2_label and dto.button_2_url:
             buttons.append({"label": dto.button_2_label, "url": dto.button_2_url})
-        if buttons: activity["buttons"] = buttons
+        if buttons: activity["buttons"] = buttons # noqa: E701
 
         payload = {
             "cmd": "SET_ACTIVITY",
@@ -107,8 +108,7 @@ class DiscordRpcService(IDisposable):
         }
 
         compact_json = json.dumps(payload, separators=(",", ":"))
-        if __debug__:
-            print(f"[DiscordRpc::Message] Pipe message sent: {compact_json}")
+        self.logger.info(f"Message: {compact_json}")
         self._send(1, compact_json)
         
     def stop(self):

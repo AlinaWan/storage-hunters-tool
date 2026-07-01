@@ -27,6 +27,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
   <video src="https://github.com/user-attachments/assets/6af38b00-a857-42af-97e9-398640524714" alt="Demonstration Video" width="100%" controls>
   </video>
   <img src="assets/preview_img.webp" alt="Preview Image" width="100%">
+   <img src="assets/preview_logging.webp" alt="Preview Logging" width="100%">
 </div>
 
 -----

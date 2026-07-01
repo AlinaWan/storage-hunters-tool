@@ -1,7 +1,9 @@
 from typing import final as sealed, Callable as Action
 
+from utils.logger_mixin import LoggerMixin
+
 @sealed
-class RecacheManager:
+class RecacheManager(LoggerMixin):
     def __init__(self):
         self._callbacks: list[Action[[], None]] = []
         self._pending = False
@@ -22,4 +24,4 @@ class RecacheManager:
             try:
                 cb()
             except Exception as e:
-                print(f"[RecacheManager::Trigger] Callback error: {e}")
+                self.logger.exception(f"[RecacheManager::Trigger] Callback error: {e}")
