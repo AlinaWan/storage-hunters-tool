@@ -5,14 +5,14 @@ from _tkinter import TclError
 import cv2
 
 from src.core.constants import Constants
-from src.core.interfaces import IApplicationOrchestrator
+from src.core.interfaces import IApplicationOrchestrator, IApplicationFactory
 from src.core.native_methods import NativeMethods
 from src.factories.application_factory import ApplicationFactory
 from src.utils.safe_message_box import SafeMessageBox
 
 class ApplicationOrchestrator(IApplicationOrchestrator):
-    def __init__(self):
-        self.factory = ApplicationFactory()
+    def __init__(self, factory: IApplicationFactory):
+        self.factory = factory
 
     def run(self):
         try:

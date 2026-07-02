@@ -7,11 +7,13 @@ import faulthandler
 faulthandler.enable()
 
 from src.application_orchestrator import ApplicationOrchestrator
+from src.factories.application_factory import ApplicationFactory
 
 class Program():
     @staticmethod
     def main():
-        orchestrator = ApplicationOrchestrator()
+        factory = ApplicationFactory()
+        orchestrator = ApplicationOrchestrator(factory)
         orchestrator.run()
 
 if __name__ == "__main__":
