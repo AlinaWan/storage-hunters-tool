@@ -24,10 +24,10 @@ from core.native_methods import NativeMethods
 from dtos.config_runtime_state_dto import ConfigRuntimeStateDto
 from dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
 from dtos.screen_coordinate_cache_dto import ScreenCoordinateCacheDto
+from factories.logger_factory import LoggerFactory
 from services.console_logger_provider import ConsoleLoggerProvider
 from services.discord_rpc_service import DiscordRpcService
 from services.hotkey_listener import HotkeyListener
-from services.logger_factory import LoggerFactory
 from services.recache_manager import RecacheManager
 from ui.debug_window import DebugWindow
 from ui.menu_overlay import MenuOverlay
