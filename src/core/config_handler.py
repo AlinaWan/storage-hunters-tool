@@ -6,11 +6,11 @@ from datetime import datetime, timezone
 from tkinter import filedialog
 from typing import final as sealed
 
-from core.config import Config
-from core.constants import Constants
-from dtos.config_runtime_state_dto import ConfigRuntimeStateDto
-from utils.logger_mixin import LoggerMixin
-from utils.math_evaluator import MathEvaluator
+from src.core.config import Config
+from src.core.constants import Constants
+from src.dtos.config_runtime_state_dto import ConfigRuntimeStateDto
+from src.utils.logger_mixin import LoggerMixin
+from src.utils.math_evaluator import MathEvaluator
 
 evaluator = MathEvaluator({
     "SCREEN_WIDTH": Constants.SCREEN_WIDTH,

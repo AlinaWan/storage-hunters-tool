@@ -3,9 +3,9 @@ import time
 import threading
 from typing import final as sealed
 
-from core.interfaces import IDisposable
-from core.native_methods import NativeMethods
-from utils.logger_mixin import LoggerMixin
+from src.core.interfaces import IDisposable
+from src.core.native_methods import NativeMethods
+from src.utils.logger_mixin import LoggerMixin
 
 @sealed
 class FileWatcher(LoggerMixin, IDisposable):

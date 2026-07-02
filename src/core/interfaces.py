@@ -2,6 +2,16 @@ import logging
 
 from typing import Protocol, runtime_checkable
 
+class IApplication(Protocol):
+    def run(self) -> None: ...
+    def current_domain_process_exit(self) -> None: ...
+
+class IApplicationFactory(Protocol):
+    def create(self) -> IApplication: ...
+
+class IApplicationOrchestrator(Protocol):
+    def run(self) -> None: ...
+
 class IDisposable(Protocol):
     def dispose(self) -> None: ...
 

@@ -1,6 +1,6 @@
 import logging
 
-from core.interfaces import ILoggerProvider
+from src.core.interfaces import ILoggerProvider
 
 class FileLoggerProvider(ILoggerProvider):
     def __init__(self, formatter: logging.Formatter, file_path: str, mode: str = "a"):

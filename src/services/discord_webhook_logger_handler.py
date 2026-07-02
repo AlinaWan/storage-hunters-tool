@@ -5,7 +5,7 @@ import threading
 import urllib.request
 from datetime import datetime, timezone
 
-from core.interfaces import IDisposable
+from src.core.interfaces import IDisposable
 
 class DiscordWebhookLoggerHandler(logging.Handler, IDisposable):
     LEVEL_COLORS = {

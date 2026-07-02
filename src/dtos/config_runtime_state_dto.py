@@ -1,6 +1,6 @@
 from typing import Any, final as sealed
 
-from services.file_watcher import FileWatcher
+from src.services.file_watcher import FileWatcher
 
 @sealed
 class ConfigRuntimeStateDto:

@@ -14,7 +14,7 @@ import sys
 import subprocess
 import threading
 
-from utils.logger_mixin import LoggerMixin
+from src.utils.logger_mixin import LoggerMixin
 
 class SafeMessageBox(LoggerMixin):
     # this is a static class so we have to pass the logger through a small hack

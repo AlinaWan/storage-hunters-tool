@@ -1,6 +1,6 @@
 import logging
 
-from core.interfaces import ILoggerProvider
+from src.core.interfaces import ILoggerProvider
 
 class ConsoleLoggerProvider(ILoggerProvider):
     def __init__(self, formatter: logging.Formatter):

@@ -48,7 +48,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 
 2.  Initialize the script via terminal:
     ```powershell
-    python -O src\program.pyw
+    python -O program.pyw
     ```
 
 -----
@@ -83,6 +83,35 @@ Storage Hunters Tool is highly customizable. All profiles and automation behavio
 > For a full breakdown of every constant and how to tune them, please see:
 >
 > ➔ [CONFIGURATION.md](docs/CONFIGURATION.md)
+
+-----
+
+## ⚙️ Technical Specification
+
+<details>
+  <summary>Expand details</summary>
+
+The Præstantia Summa 2 Engine used in this project significantly improves upon the Præstantia Summa 1 Engine used in [Bees Tool](https://github.com/AlinaWan/bees-tool):
+
+ * Core Design Principles:
+   * Follows interface-based architecture
+   * Follows the .NET dispose pattern (stop/close/dispose)
+   * Follows the provider pattern
+   * Follows the factory method pattern
+   * Follows the data transfer object (DTO) pattern
+   * Follows the inversion of control (IoC) principle
+   * Follows the single-responsibility principle (SRP)
+
+ * Core Architecture:
+   * Factory-provider based logger with three standard logging providers:
+     * ConsoleLoggerProvider
+     * FileLoggerProvider
+     * DiscordWebhookLoggerProvider
+     * The logger factory, logger provider, and logging formatter are fully decoupled and abstracted, enabling you to swap in your own provider or formatter for logging to ELK Stack, CloudWatch, Splunk, etc.
+     * Multiple providers can be added to the logger factory at the same time.
+   * Single-responsibility application factory, application orchestrator, and application to manage lifecycle and controlled dependency injection.
+
+</details>
 
 -----
 

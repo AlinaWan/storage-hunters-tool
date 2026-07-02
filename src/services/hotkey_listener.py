@@ -1,9 +1,9 @@
 import threading
 from typing import final as sealed, override
 
-from core.config import Config
-from core.interfaces import IDisposable
-from core.native_methods import NativeMethods
+from src.core.config import Config
+from src.core.interfaces import IDisposable
+from src.core.native_methods import NativeMethods
 
 @sealed
 class HotkeyListener(threading.Thread, IDisposable):

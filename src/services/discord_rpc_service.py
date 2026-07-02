@@ -5,10 +5,10 @@ import time
 import uuid
 from typing import final as sealed
 
-from core.interfaces import IDisposable
-from core.native_methods import NativeMethods
-from dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
-from utils.logger_mixin import LoggerMixin
+from src.core.interfaces import IDisposable
+from src.core.native_methods import NativeMethods
+from src.dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
+from src.utils.logger_mixin import LoggerMixin
 
 @sealed
 class DiscordRpcService(LoggerMixin, IDisposable):

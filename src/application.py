@@ -1,45 +1,35 @@
-﻿# -*- coding: utf-8 -*-
-__version__ = "1.0.0"
-__author__ = "Riri"
-__license__ = "MIT"
-
-import faulthandler
-faulthandler.enable()
-
-import atexit
-import signal
-import time
+﻿import time
 import threading
-from _tkinter import TclError
 from typing import final as sealed
 
 import cv2
 import numpy as np
 import bettercam
 
-from core.config import Config
-from core.config_handler import ConfigHandler
-from core.constants import Constants
-from core.native_methods import NativeMethods
-from dtos.config_runtime_state_dto import ConfigRuntimeStateDto
-from dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
-from dtos.screen_coordinate_cache_dto import ScreenCoordinateCacheDto
-from factories.logger_factory import LoggerFactory
-from services.console_logger_provider import ConsoleLoggerProvider
-from services.discord_rpc_service import DiscordRpcService
-from services.hotkey_listener import HotkeyListener
-from services.recache_manager import RecacheManager
-from ui.debug_window import DebugWindow
-from ui.menu_overlay import MenuOverlay
-from ui.scan_area_overlay import ScanAreaOverlay
-from ui.tooltip_marker import TooltipMarker
-from utils.logger_mixin import LoggerMixin
-from utils.logging_formatter import LoggingFormatter
-from utils.safe_message_box import SafeMessageBox
+from src.core.config import Config
+from src.core.config_handler import ConfigHandler
+from src.core.constants import Constants
+from src.core.interfaces import IApplication
+from src.core.native_methods import NativeMethods
+from src.dtos.config_runtime_state_dto import ConfigRuntimeStateDto
+from src.dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
+from src.dtos.screen_coordinate_cache_dto import ScreenCoordinateCacheDto
+from src.services.discord_rpc_service import DiscordRpcService
+from src.services.hotkey_listener import HotkeyListener
+from src.services.recache_manager import RecacheManager
+from src.ui.debug_window import DebugWindow
+from src.ui.menu_overlay import MenuOverlay
+from src.ui.scan_area_overlay import ScanAreaOverlay
+from src.ui.tooltip_marker import TooltipMarker
+from src.utils.logger_mixin import LoggerMixin
+from src.utils.safe_message_box import SafeMessageBox
 
 @sealed
-class Program(LoggerMixin):
-    def __init__(self):
+class Application(LoggerMixin, IApplication):
+    def __init__(self, factory):
+        self.logger_factory = factory
+        self.mutex_handle = None
+
         self.menu = None
         self.should_exit = False
         self.is_active = False
@@ -543,99 +533,3 @@ class Program(LoggerMixin):
             NativeMethods.release_mutex(self.mutex_handle)
             NativeMethods.close_handle(self.mutex_handle)
 
-    @staticmethod
-    def main():
-        # This should be called BEFORE ANYTHING ELSE
-        try:
-            NativeMethods.set_process_dpi_awareness_context(-4)
-        except Exception:
-            pass
-
-        mutex, is_first_instance = NativeMethods.create_single_instance_mutex(f"Global\\{Constants.GUID}")
-        if not is_first_instance:
-            SafeMessageBox.show_message_box_sync(SafeMessageBox,
-                "Another instance of Storage Hunters Tool is already running.",
-                "Already Running",
-                NativeMethods.MB_OK | NativeMethods.MB_ICONINFORMATION
-            )
-            raise SystemExit(0)
-
-        # new logger factory
-        factory = LoggerFactory()
-
-        if __debug__:
-            formatter = Constants.LOGGING_FORMATTER()
-
-            provider = Constants.CONSOLE_LOGGER_PROVIDER
-            factory.add_provider(provider(formatter))
-
-            if Constants.WRITE_LOGS:
-                import os
-                from datetime import datetime, timezone
-                os.makedirs(Constants.LOG_DIR, exist_ok=True)
-                timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-                file_path = os.path.join(Constants.LOG_DIR, f"log-Storage_Hunters_Tool-{timestamp}.log")
-                provider = Constants.FILE_LOGGER_PROVIDER
-                factory.add_provider(provider(file_path=file_path, formatter=formatter))
-
-            if Constants.WRITE_DISCORD_WEBHOOK_LOGS:
-                provider = Constants.DISCORD_WEBHOOK_LOGGER_PROVIDER
-                factory.add_provider(provider(webhook_url=Constants.DISCORD_WEBHOOK_LOGGER_URL, formatter=formatter))
-
-        LoggerMixin.set_factory(factory)
-
-        test_logger = factory.create_logger("Bootstrap")
-        test_logger.info("Logger initialized and working.")
-
-        app = Program()
-        app.mutex_handle = mutex
-        app.logger_factory = factory
-        atexit.register(app.current_domain_process_exit)
-        signal.signal(signal.SIGINT, lambda *_,: setattr(app, 'should_exit', True)) # exit cleanly
-
-        try:
-            app.run()
-        except cv2.error as e:
-            SafeMessageBox.show_message_box_sync(SafeMessageBox,
-                "An OpenCV error occurred during runtime:\n\n" +
-                f"{e}\n\n" +
-                "The program will now exit.",
-                "Fatal Error",
-                NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
-            )
-            raise
-
-        except TclError as e:
-            if "bad geometry specifier" in str(e):
-                SafeMessageBox.show_message_box_sync(SafeMessageBox,
-                    "Tcl raised bad geometry specifier during runtime:\n\n" +
-                    f"{e}\n\n" +
-                    "This is usually because a configuration setting is too negative, and " +
-                    "Tcl does not allow negative width or height in geometry strings.\n\n" + 
-                    "The program will now exit.",
-                    "Fatal Error",
-                    NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
-                )
-                raise
-            else:
-                SafeMessageBox.show_message_box_sync(SafeMessageBox,
-                    "A Tcl error occurred during runtime:\n\n" +
-                    f"{e}\n\n" +
-                    "The program will now exit.",
-                    "Fatal Error",
-                    NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
-                )
-                raise
-
-        except Exception as e:
-            SafeMessageBox.show_message_box_sync(SafeMessageBox,
-                "An unexpected error occurred during runtime:\n\n" +
-                f"{e}\n\n" +
-                "The program will now exit.",
-                "Fatal Error",
-                NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
-            )
-            raise
-
-if __name__ == "__main__":
-    Program.main()

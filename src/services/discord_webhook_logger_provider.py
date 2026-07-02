@@ -1,7 +1,7 @@
 import logging
 
-from core.interfaces import ILoggerProvider
-from services.discord_webhook_logger_handler import DiscordWebhookLoggerHandler
+from src.core.interfaces import ILoggerProvider
+from src.services.discord_webhook_logger_handler import DiscordWebhookLoggerHandler
 
 class DiscordWebhookLoggerProvider(ILoggerProvider):
     def __init__(self, formatter: logging.Formatter, webhook_url: str):

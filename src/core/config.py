@@ -1,6 +1,6 @@
 from typing import final as sealed
 
-from core.constants import Constants
+from src.core.constants import Constants
 
 @sealed
 class Config:

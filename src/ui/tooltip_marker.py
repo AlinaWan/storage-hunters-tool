@@ -1,7 +1,7 @@
 import tkinter as tk
 from typing import final as sealed
 
-from core.config import Config
+from src.core.config import Config
 
 @sealed
 class TooltipMarker:

@@ -1,6 +1,6 @@
 import logging
 
-from core.interfaces import ILoggerFactory
+from src.core.interfaces import ILoggerFactory
 
 class LoggerMixin:
     _factory: ILoggerFactory = None 

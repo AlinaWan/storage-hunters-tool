@@ -1,6 +1,6 @@
 import logging
 
-from core.interfaces import ILogger, ILoggerFactory, ILoggerProvider
+from src.core.interfaces import ILogger, ILoggerFactory, ILoggerProvider
 
 class LoggerFactory(ILoggerFactory):
     def __init__(self):

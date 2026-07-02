@@ -1,7 +1,7 @@
 import tkinter as tk
 from typing import final as sealed
 
-from core.native_methods import NativeMethods
+from src.core.native_methods import NativeMethods
 
 @sealed
 class MenuOverlay:

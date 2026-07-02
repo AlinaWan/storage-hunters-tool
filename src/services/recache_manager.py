@@ -1,6 +1,6 @@
 from typing import final as sealed, Callable as Action
 
-from utils.logger_mixin import LoggerMixin
+from src.utils.logger_mixin import LoggerMixin
 
 @sealed
 class RecacheManager(LoggerMixin):

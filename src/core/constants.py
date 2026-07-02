@@ -1,11 +1,11 @@
 from pathlib import Path
 from typing import Final as ReadOnly, final as sealed
 
-from core.native_methods import NativeMethods
-from services.console_logger_provider import ConsoleLoggerProvider
-from services.discord_webhook_logger_provider import DiscordWebhookLoggerProvider
-from services.file_logger_provider import FileLoggerProvider
-from utils.logging_formatter import LoggingFormatter
+from src.core.native_methods import NativeMethods
+from src.services.console_logger_provider import ConsoleLoggerProvider
+from src.services.discord_webhook_logger_provider import DiscordWebhookLoggerProvider
+from src.services.file_logger_provider import FileLoggerProvider
+from src.utils.logging_formatter import LoggingFormatter
 
 @sealed
 class Constants:
