@@ -3,31 +3,18 @@ import logging
 import queue
 import threading
 import urllib.request
-from datetime import datetime, timezone
+from typing import Dict as Dictionary
 
 from src.core.interfaces import IDisposable
+from src.utils.discord_webhook_payload_formatter import DiscordWebhookPayloadFormatter
 
 class DiscordWebhookLoggerHandler(logging.Handler, IDisposable):
-    LEVEL_COLORS = {
-        logging.DEBUG: 0x95A5A6,      # gray
-        logging.INFO: 0x3498DB,       # blue
-        logging.WARNING: 0xF1C40F,    # yellow
-        logging.ERROR: 0xE74C3C,      # red
-        logging.CRITICAL: 0x8E44AD    # purple
-    }
-
-    LEVEL_ICONS = {
-        logging.DEBUG: "🔍",
-        logging.INFO: "ℹ️",
-        logging.WARNING: "⚠️",
-        logging.ERROR: "❌",
-        logging.CRITICAL: "🚨"
-    }
-
-    def __init__(self, webhook_url: str):
+    def __init__(self, webhook_url: str, formatter: DiscordWebhookPayloadFormatter):
         super().__init__()
         self.url = webhook_url
-        self.queue = queue.Queue()
+        self.payload_formatter = formatter
+
+        self.queue = queue.Queue[Dictionary]()
         self._cts = threading.Event()
 
         self.worker = threading.Thread(
@@ -37,44 +24,15 @@ class DiscordWebhookLoggerHandler(logging.Handler, IDisposable):
         self.worker.start()
 
     def emit(self, record: logging.LogRecord) -> None:
-        payload = {
-                "embeds": [{
-                    "title": (
-                        f"{self.LEVEL_ICONS.get(record.levelno, '📝')} "
-                        f"{record.levelname}"
-                    ),
-
-                    "description":
-                        f"```{self.format(record)}```",
-
-                    "color":
-                        self.LEVEL_COLORS.get(
-                            record.levelno,
-                            0x3498DB
-                        ),
-
-                    "fields": [
-                        {
-                            "name": "Identity",
-                            "value": record.name.replace("_", "\\_"),
-                            "inline": True
-                        },
-                        {
-                            "name": "Method",
-                            "value": record.funcName.replace("_", "\\_"),
-                            "inline": True
-                        }
-                    ],
-
-                    "timestamp":
-                        datetime.now(timezone.utc).isoformat()
-                }]
-            }
+        payload = self.payload_formatter.format(
+            self,
+            record
+        )
 
         self.queue.put(payload)
 
     def _processor(self):
-        while not self._cts.is_set():
+        while not self._cts.is_set() or not self.queue.empty():
             try:
                 payload = self.queue.get(timeout=1)
 
@@ -100,7 +58,7 @@ class DiscordWebhookLoggerHandler(logging.Handler, IDisposable):
             except queue.Empty:
                 continue
 
-            except Exception as e:
+            except Exception:
                 pass
 
     def stop(self) -> None:

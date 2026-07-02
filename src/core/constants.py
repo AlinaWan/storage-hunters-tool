@@ -1,11 +1,8 @@
+import os
 from pathlib import Path
 from typing import Final as ReadOnly, final as sealed
 
 from src.core.native_methods import NativeMethods
-from src.services.console_logger_provider import ConsoleLoggerProvider
-from src.services.discord_webhook_logger_provider import DiscordWebhookLoggerProvider
-from src.services.file_logger_provider import FileLoggerProvider
-from src.utils.logging_formatter import LoggingFormatter
 
 @sealed
 class Constants:
@@ -13,14 +10,10 @@ class Constants:
     SCRIPT_DIR: ReadOnly = Path(__file__).resolve().parent.parent # src\ dir
     WINDOWS_DIR: ReadOnly = Path(NativeMethods.get_windows_directory())
 
-    CONSOLE_LOGGER_PROVIDER: ReadOnly = ConsoleLoggerProvider
-    FILE_LOGGER_PROVIDER: ReadOnly = FileLoggerProvider
-    DISCORD_WEBHOOK_LOGGER_PROVIDER: ReadOnly = DiscordWebhookLoggerProvider
-    LOGGING_FORMATTER: ReadOnly = LoggingFormatter
     LOG_DIR: ReadOnly = "logs"
     WRITE_LOGS: ReadOnly = False
     WRITE_DISCORD_WEBHOOK_LOGS: ReadOnly = False
-    DISCORD_WEBHOOK_LOGGER_URL: ReadOnly = ""
+    DISCORD_WEBHOOK_LOGGER_URL: ReadOnly = os.getenv("DISCORD_WEBHOOK_LOGGER_URL", "")
 
     TEXT_EDITOR_PATH: ReadOnly = WINDOWS_DIR / "System32" / "notepad.exe"
 

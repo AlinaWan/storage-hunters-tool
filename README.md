@@ -94,13 +94,20 @@ Storage Hunters Tool is highly customizable. All profiles and automation behavio
 The Præstantia Summa 2 Engine used in this project significantly improves upon the Præstantia Summa 1 Engine used in [Bees Tool](https://github.com/AlinaWan/bees-tool):
 
  * Core Design Principles:
+   * Follows the SOLID principles:
+     * Follows the single-responsibility principle (SRP)
+     * Follows the open/closed principle (OCP)
+     * Follows the Liskov substitution principle (LSP)
+     * Follows the interface segregation principle (ISP)
+     * Follows the dependency inversion principle (DIP)
    * Follows interface-based architecture
    * Follows the .NET dispose pattern (stop/close/dispose)
-   * Follows the provider pattern
    * Follows the factory method pattern
+   * Follows the provider pattern
    * Follows the data transfer object (DTO) pattern
+   * Follows the dependency injection (DI) pattern
    * Follows the inversion of control (IoC) principle
-   * Follows the single-responsibility principle (SRP)
+   * Follows the principle of least astonishment (POLA)
 
  * Core Architecture:
    * Factory-provider based logger with three standard logging providers:
