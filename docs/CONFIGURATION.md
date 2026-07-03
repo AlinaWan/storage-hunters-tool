@@ -13,7 +13,7 @@ Adjust these values within your `.json` config to align with your hardware's per
 | :--- | :--- |
 | `CLICK_COOLDOWN_MS` | The minimum cooling period (in milliseconds) required between consecutive mouse click triggers to prevent spamming. |
 | `CLICK_COORDINATE` | The absolute screen position coordinate dictionary `{"x", "y"}` where the click action will be dispatched. |
-| `SEARCH_REGION` | The localized bounding box dictionary defining the vertical/horizontal pixel coordinates and dimensions of the processing capture zone. |
+| `SEARCH_REGION` | The localized bounding box dictionary defining the vertical/horizontal pixel coordinates and dimensions of the processing capture zone. **IMPORTANT: If you use any one of the following aspect ratios, you should NOT need to change this regardless of your resolution: 16:9, 16:10, 25:16, 4:3, 48:35, 683:384, 85:48, 5:4, 5:3, 32:15.** Only change this if you use a scale other than 100% or the search area is still incorrect after using the application. |
 | `USE_FULLSCREEN_OFFSET` | A boolean toggle to manually enable vertical adjustments for fullscreen use, which shifts both the click coordinates and the search region. |
 | `FULLSCREEN_Y_OFFSET` | The vertical displacement value in pixels applied to use if `USE_FULLSCREEN_OFFSET` is `True`. A positive value moves the click coordinate and search region down. |
 | `MAX_LINE_WIDTH_PX` | The maximum allowable pixel width for the moving indicator line, used as a structural threshold to distinguish the valid tracking line from background noise or larger UI elements. |

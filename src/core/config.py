@@ -7,12 +7,65 @@ class Config:
 
     # Automation
     CLICK_COOLDOWN_MS = 250
-    CLICK_COORDINATE = {"x": int(Constants.SCREEN_WIDTH  * (960 / 1920)),
+    CLICK_COORDINATE = {"x": int(Constants.SCREEN_WIDTH / 2),
                         "y": int(Constants.SCREEN_HEIGHT * (860 / 1080))}
-    SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (752 / 1080)),
-                     "left":   int(Constants.SCREEN_WIDTH  * (614 / 1920)),
-                     "width":  int(Constants.SCREEN_WIDTH  * (692 / 1920)),
-                     "height": int(Constants.SCREEN_HEIGHT * (57 / 1080))}
+
+    if Constants.SCREEN_WIDTH * 9 == Constants.SCREEN_HEIGHT * 16:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (752 / 1080)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (614 / 1920)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (692 / 1920)),
+                         "height": int(Constants.SCREEN_HEIGHT * (57 / 1080))}
+    elif Constants.SCREEN_WIDTH * 10 == Constants.SCREEN_HEIGHT * 16:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (748 / 1050)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (538 / 1680)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (604 / 1680)),
+                         "height": int(Constants.SCREEN_HEIGHT * (50 / 1050))}
+    elif Constants.SCREEN_WIDTH * 16 == Constants.SCREEN_HEIGHT * 25:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (732 / 1024)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (512 / 1600)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (576 / 1600)),
+                         "height": int(Constants.SCREEN_HEIGHT * (48 / 1024))}
+    elif Constants.SCREEN_WIDTH * 3 == Constants.SCREEN_HEIGHT * 4:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (798 / 1080)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (461 / 1440)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (518 / 1440)),
+                         "height": int(Constants.SCREEN_HEIGHT * (43 / 1080))}
+    elif Constants.SCREEN_WIDTH * 35 == Constants.SCREEN_HEIGHT * 48:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (775 / 1050)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (448 / 1440)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (504 / 1440)),
+                         "height": int(Constants.SCREEN_HEIGHT * (41 / 1050))}
+    elif Constants.SCREEN_WIDTH * 384 == Constants.SCREEN_HEIGHT * 683:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (524 / 768)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (437 / 1366)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (492 / 1366)),
+                         "height": int(Constants.SCREEN_HEIGHT * (41 / 768))}
+    elif Constants.SCREEN_WIDTH * 48 == Constants.SCREEN_HEIGHT * 85:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (525 / 768)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (435 / 1360)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (490 / 1360)),
+                         "height": int(Constants.SCREEN_HEIGHT * (40 / 768))}
+    elif Constants.SCREEN_WIDTH * 4 == Constants.SCREEN_HEIGHT * 5:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (763 / 1024)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (410 / 1280)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (460 / 1280)),
+                         "height": int(Constants.SCREEN_HEIGHT * (38 / 1024))}
+    elif Constants.SCREEN_WIDTH * 3 == Constants.SCREEN_HEIGHT * 5:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (533 / 768)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (410 / 1280)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (460 / 1280)),
+                         "height": int(Constants.SCREEN_HEIGHT * (38 / 768))}
+    elif Constants.SCREEN_WIDTH * 15 == Constants.SCREEN_HEIGHT * 32:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (381 / 600)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (410 / 1280)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (460 / 1280)),
+                         "height": int(Constants.SCREEN_HEIGHT * (38 / 600))}
+    else:
+        SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (752 / 1080)),
+                         "left":   int(Constants.SCREEN_WIDTH  * (614 / 1920)),
+                         "width":  int(Constants.SCREEN_WIDTH  * (692 / 1920)),
+                         "height": int(Constants.SCREEN_HEIGHT * (57 / 1080))}
+
     USE_FULLSCREEN_OFFSET = False
     FULLSCREEN_Y_OFFSET = int(Constants.SCREEN_HEIGHT * (40 / 1080))
     MAX_LINE_WIDTH_PX = int(Constants.SCREEN_WIDTH * (20 / 1920))
