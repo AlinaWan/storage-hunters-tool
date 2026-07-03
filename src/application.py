@@ -22,7 +22,9 @@ from src.ui.menu_overlay import MenuOverlay
 from src.ui.scan_area_overlay import ScanAreaOverlay
 from src.ui.tooltip_marker import TooltipMarker
 from src.utils.logger_mixin import LoggerMixin
+from src.utils.process_locator import ProcessLocator
 from src.utils.safe_message_box import SafeMessageBox
+from src.utils.window_controller import WindowController, FocusWindowResult
 
 @sealed
 class Application(LoggerMixin, IApplication):
@@ -65,9 +67,21 @@ class Application(LoggerMixin, IApplication):
         self.recache_manager.register(self._recache)
 
     def toggle_logic(self):
+        # focus roblox if we are toggling active -> True
+        if not self.is_active:
+            if (pid := ProcessLocator.get_process_pid("RobloxPlayerBeta.exe", require_visible=True)) is not None:
+                hwnd = NativeMethods.get_hwnd_from_pid(pid, require_visible=True)
+                result = WindowController.focus_window(pid, hwnd)
+                match result:
+                    case FocusWindowResult.SUCCESS:
+                        self.logger.info(f"Successfully focused primary window container handle ({hwnd}) for PID {pid}.")
+                    case FocusWindowResult.NO_VISIBLE_WINDOW:
+                        self.logger.warning(f"RobloxPlayerBeta.exe process running on PID {pid}, but no visible window handle was found.")
+            else:
+                self.logger.warning("RobloxPlayerBeta.exe process was not detected to focus.")
+
         self.is_active = not self.is_active
         self.logger.info(f"Active = {self.is_active}")
-
         self._sync_discord_rpc_presence()
 
     def exit_logic(self):
@@ -80,13 +94,13 @@ class Application(LoggerMixin, IApplication):
 
     def _handle_hotkey_retry(self):
         def on_result(result):
-            if result == 4:  # Retry clicked
+            if result == NativeMethods.IDRETRY:  # Retry clicked
                 self.logger.info("Retrying hotkey registration...")
                 self._update_hotkey_registration()
             else:
                 self.logger.info("User bypassed hotkey warning configuration.")
 
-        SafeMessageBox.show_message_box_async(SafeMessageBox,
+        SafeMessageBox.show_message_box_async(
             "Failed to register one or more hotkeys.\n\n"
             "This is usually because another program is already using them. "
             "Please close conflicting apps or change your hotkeys and click 'Retry', or 'Cancel' to continue.",
@@ -218,6 +232,18 @@ class Application(LoggerMixin, IApplication):
         self.area_visual = ScanAreaOverlay(self.coords_cache.search_region, 1.0)
 
         self.logger.info("Initialized.")
+
+        # focus on launch for convinience
+        if (pid := ProcessLocator.get_process_pid("RobloxPlayerBeta.exe", require_visible=True)) is not None:
+            hwnd = NativeMethods.get_hwnd_from_pid(pid, require_visible=True)
+            result = WindowController.focus_window(pid, hwnd)
+            match result:
+                case FocusWindowResult.SUCCESS:
+                    self.logger.info(f"Successfully focused primary window container handle ({hwnd}) for PID {pid}.")
+                case FocusWindowResult.NO_VISIBLE_WINDOW:
+                    self.logger.warning(f"RobloxPlayerBeta.exe process running on PID {pid}, but no visible window handle was found.")
+        else:
+            self.logger.warning("RobloxPlayerBeta.exe process was not detected to focus.")
 
         # initialize bettercam with BGRA output format to match OpenCV pipeline
         camera = bettercam.create(output_color="BGRA")

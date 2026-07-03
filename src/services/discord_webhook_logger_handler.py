@@ -6,10 +6,10 @@ import urllib.request
 from typing import Dict as Dictionary
 
 from src.core.interfaces import IDisposable
-from src.utils.discord_webhook_payload_formatter import DiscordWebhookPayloadFormatter
+from src.utils.discord_webhook_logger_payload_formatter import DiscordWebhookLoggerPayloadFormatter
 
 class DiscordWebhookLoggerHandler(logging.Handler, IDisposable):
-    def __init__(self, webhook_url: str, formatter: DiscordWebhookPayloadFormatter):
+    def __init__(self, webhook_url: str, formatter: DiscordWebhookLoggerPayloadFormatter):
         super().__init__()
         self.url = webhook_url
         self.payload_formatter = formatter

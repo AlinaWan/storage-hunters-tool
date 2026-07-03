@@ -29,6 +29,7 @@ class ApplicationOrchestrator(IApplicationOrchestrator):
 
         atexit.register(app.current_domain_process_exit)
         signal.signal(signal.SIGINT, lambda *_,: setattr(app, 'should_exit', True))
+        signal.signal(signal.SIGTERM, lambda *_,: setattr(app, 'should_exit', True))
 
         try:
             app.run()
@@ -40,7 +41,7 @@ class ApplicationOrchestrator(IApplicationOrchestrator):
             raise
 
     def _show_already_running(self):
-        SafeMessageBox.show_message_box_sync(SafeMessageBox,
+        SafeMessageBox.show_message_box_sync(
             "Another instance of Storage Hunters Tool is already running.",
             "Already Running",
             NativeMethods.MB_OK | NativeMethods.MB_ICONINFORMATION
@@ -78,5 +79,5 @@ class ApplicationOrchestrator(IApplicationOrchestrator):
             )
 
         SafeMessageBox.show_message_box_sync(
-            SafeMessageBox, message, "Fatal Error", NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
+            message, "Fatal Error", NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
         )

@@ -134,6 +134,22 @@ class NativeMethods:
     _PROCESS_VM_READ: ReadOnly = 0x0010
     _SYNCHRONIZE: ReadOnly = 0x00100000
 
+    _SW_HIDE: ReadOnly = 0x00
+    _SW_SHOWNORMAL: ReadOnly = 0x01
+    _SW_NORMAL: ReadOnly = 0x01
+    _SW_SHOWMINIMIZED: ReadOnly = 0x02
+    _SW_SHOWMAXIMIZED: ReadOnly = 0x03
+    _SW_MAXIMIZE: ReadOnly = 0x03
+    _SW_SHOWNOACTIVATE: ReadOnly = 0x04
+    _SW_SHOW: ReadOnly = 0x05
+    _SW_MINIMIZE: ReadOnly = 0x06
+    _SW_SHOWMINNOACTIVE: ReadOnly = 0x07
+    _SW_SHOWNA: ReadOnly = 0x08
+    _SW_RESTORE: ReadOnly = 0x09
+    _SW_SHOWDEFAULT: ReadOnly = 0x0A
+    _SW_FORCEMINIMIZE: ReadOnly = 0x0B
+    _SW_MAX: ReadOnly = 0x0B
+
     _FILE_FLAG_OVERLAPPED: ReadOnly = 0x40000000
     _WAIT_OBJECT_0: ReadOnly = 0x00000000
     _INFINITE: ReadOnly = 0xFFFFFFFF
@@ -158,6 +174,14 @@ class NativeMethods:
     MB_RETRYCANCEL: ReadOnly = 0x00000005
     MB_CANCELTRYCONTINUE: ReadOnly = 0x00000006
     MB_HELP: ReadOnly = 0x00004000
+
+    IDOK: ReadOnly = 0x00000001
+    IDCANCEL: ReadOnly = 0x00000002
+    IDABORT: ReadOnly = 0x00000003
+    IDRETRY: ReadOnly = 0x00000004
+    IDIGNORE: ReadOnly = 0x00000005
+    IDYES: ReadOnly = 0x00000006
+    IDNO: ReadOnly = 0x00000007
 
     WM_QUIT: ReadOnly = 0x0012
     WM_HOTKEY: ReadOnly = 0x0312
@@ -287,6 +311,18 @@ class NativeMethods:
 
     _user32.SetProcessDpiAwarenessContext.argtypes = [ctypes.c_void_p]
     _user32.SetProcessDpiAwarenessContext.restype = wintypes.BOOL
+
+    _user32.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
+    _user32.ShowWindow.restype = wintypes.BOOL
+
+    _user32.SetForegroundWindow.argtypes = [wintypes.HWND]
+    _user32.SetForegroundWindow.restype = wintypes.BOOL
+
+    _user32.GetForegroundWindow.argtypes = []
+    _user32.GetForegroundWindow.restype = wintypes.HWND
+
+    _user32.IsIconic.argtypes = [wintypes.HWND]
+    _user32.IsIconic.restype = wintypes.BOOL
 
     # Memory management related methods
     @staticmethod
@@ -639,6 +675,59 @@ class NativeMethods:
     @staticmethod
     def abort_system_shutdown():
         return NativeMethods._advapi32.AbortSystemShutdownW(None)
+
+    # Window management related processes
+    @staticmethod
+    def get_all_hwnds() -> list[int]:
+        hwnds = []
+        
+        def callback(hwnd, lParam):
+            hwnds.append(hwnd)
+            return True
+
+        enum_proc = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+        NativeMethods._user32.EnumWindows(enum_proc(callback), 0)
+        return hwnds
+
+    @staticmethod
+    def get_window_pid(hwnd: int) -> int:
+        pid = wintypes.DWORD(0)
+        NativeMethods._user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        return pid.value
+
+    @staticmethod
+    def is_window_visible(hwnd: int) -> bool:
+        return bool(NativeMethods._user32.IsWindowVisible(hwnd))
+
+    @staticmethod
+    def get_hwnd_from_pid(pid: int, require_visible: bool = False) -> int | None:
+        for hwnd in NativeMethods.get_all_hwnds():
+            if hwnd == 0:
+                continue
+
+            if NativeMethods.get_window_pid(hwnd) != pid:
+                continue
+
+            if require_visible and not NativeMethods.is_window_visible(hwnd):
+                continue
+
+            if NativeMethods.get_parent(hwnd):
+                continue
+
+            return hwnd
+        return None
+
+    @staticmethod
+    def force_focus_window(hwnd: int) -> bool:
+        if not hwnd:
+            return False
+
+        if NativeMethods._user32.IsIconic(hwnd):
+            NativeMethods._user32.ShowWindow(hwnd, NativeMethods._SW_RESTORE)
+        else:
+            NativeMethods._user32.ShowWindow(hwnd, NativeMethods._SW_SHOW)
+
+        return bool(NativeMethods._user32.SetForegroundWindow(hwnd))
 
     # Hotkey related methods
     @staticmethod

@@ -14,7 +14,7 @@ class ApplicationFactory(IApplicationFactory):
         factory = LoggerFactory()
 
         if __debug__:
-            formatter = LoggingFormatter
+            formatter = LoggingFormatter()
 
             provider = ConsoleLoggerProvider
             factory.add_provider(provider(formatter))
