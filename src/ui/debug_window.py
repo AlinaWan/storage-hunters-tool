@@ -1,9 +1,11 @@
 import tkinter as tk
 from tkinter import Label, Frame
 from typing import final as sealed
+
 import cv2
 import numpy as np
-from PIL import Image, ImageTk
+
+from src.utils.image_converter import ImageConverter
 
 @sealed
 class DebugWindow:
@@ -92,9 +94,8 @@ class DebugWindow:
                 (self.coords_cache.search_region["width"], self.coords_cache.search_region["height"]),
                 interpolation=cv2.INTER_NEAREST
             )
-            img_pil = Image.fromarray(mask_uint8)
-            img_tk = ImageTk.PhotoImage(image=img_pil)
 
+            img_tk = ImageConverter.mat_to_tk_image(mask_uint8)
             self._current_img = img_tk
             self.debug_label.configure(image=img_tk)
 
@@ -149,9 +150,7 @@ class DebugWindow:
                     interpolation=cv2.INTER_NEAREST
                 )
                 
-                freeze_canvas_rgb = cv2.cvtColor(freeze_canvas, cv2.COLOR_BGR2RGB)
-                img_pil3 = Image.fromarray(freeze_canvas_rgb)
-                img_tk3 = ImageTk.PhotoImage(image=img_pil3)
+                img_tk3 = ImageConverter.mat_to_tk_image(freeze_canvas)
                 self._current_img3 = img_tk3
                 self.debug_label3.configure(image=img_tk3)
             else:
@@ -160,8 +159,7 @@ class DebugWindow:
                     (self.coords_cache.search_region["height"], self.coords_cache.search_region["width"], 3), 
                     dtype=np.uint8
                 )
-                img_pil3 = Image.fromarray(black_frame)
-                img_tk3 = ImageTk.PhotoImage(image=img_pil3)
+                img_tk3 = ImageConverter.mat_to_tk_image(black_frame)
                 self._current_img3 = img_tk3
                 self.debug_label3.configure(image=img_tk3)
 
@@ -171,10 +169,7 @@ class DebugWindow:
                 interpolation=cv2.INTER_NEAREST
             )
             
-            colored_mask_rgb = cv2.cvtColor(colored_mask, cv2.COLOR_BGR2RGB)
-            img_pil2 = Image.fromarray(colored_mask_rgb)
-            img_tk2 = ImageTk.PhotoImage(image=img_pil2)
-
+            img_tk2 = ImageConverter.mat_to_tk_image(colored_mask)
             self._current_img2 = img_tk2
             self.debug_label2.configure(image=img_tk2)
             
