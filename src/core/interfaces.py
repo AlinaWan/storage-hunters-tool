@@ -10,6 +10,7 @@ class IApplicationFactory(Protocol):
     def create(self) -> IApplication: ...
 
 class IApplicationOrchestrator(Protocol):
+    factory: IApplicationFactory
     def run(self) -> None: ...
 
 class IDisposable(Protocol):
