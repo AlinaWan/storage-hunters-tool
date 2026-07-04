@@ -66,6 +66,10 @@ class Application(LoggerMixin, IApplication):
         }
         self.recache_manager.register(self._recache)
 
+        if __debug__:
+            self.fps_start_time = time.perf_counter()
+            self.frame_count = 0
+
     def toggle_logic(self):
         # focus roblox if we are toggling active -> True
         if not self.is_active:
@@ -269,6 +273,16 @@ class Application(LoggerMixin, IApplication):
             frame = camera.grab(region=region)
             if frame is None:
                 continue
+
+            if __debug__:
+                # Track Performance
+                self.frame_count += 1
+                elapsed = now - self.fps_start_time
+                if elapsed >= 1.0:
+                    current_fps = self.frame_count / elapsed
+                    self.logger.info(f"Current Processing Speed: {current_fps:.2f} FPS")
+                    self.frame_count = 0
+                    self.fps_start_time = now
             
             bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
             gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)

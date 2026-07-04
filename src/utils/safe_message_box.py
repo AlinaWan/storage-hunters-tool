@@ -58,7 +58,7 @@ class SafeMessageBox():
 
         threading.Thread(target=worker, daemon=True).start()
 
-    @classmethod
+    @staticmethod
     def show_message_box_sync(text, title, flags):
         try:
             worker_path = os.path.join(

@@ -39,7 +39,7 @@ class ApplicationFactory(IApplicationFactory):
         init_logger = factory.create_logger("Bootstrap")
         init_logger.info("Logger initialized and working.")
 
-        provider_path = os.getenv("FRAME_PROVIDER", "src.services.bettercam_frame_provider.BetterCamFrameProvider")
+        provider_path = os.getenv("FRAME_PROVIDER", "src.services.dxgi_frame_provider.DxgiFrameProvider")
         try:
             frame_provider = ReflectionUtil.instantiate_class_from_fqn(provider_path)
             init_logger.info(f"Successfully loaded frame provider: {provider_path}")

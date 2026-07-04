@@ -7,6 +7,7 @@
 
 [![License](https://img.shields.io/github/license/AlinaWan/bees-tool)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
+[![C++](https://img.shields.io/badge/C++-%2300599C.svg?logo=c%2B%2B&logoColor=white)](#)
 [![Visual Studio](https://custom-icon-badges.demolab.com/badge/Visual%20Studio-5C2D91.svg?&logo=visualstudio&logoColor=white)](#)
 [![Præstantia Summa 2](https://img.shields.io/badge/Engine-Præstantia_Summa_2-007FFF)](#)
 [![❤︎](https://img.shields.io/badge/Made%20with%20%E2%9D%A4%20by%20Riri-FFCAE9)](#)
@@ -38,6 +39,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 
 - Windows 10 or 11
 - Python 3.10 or higher
+- MSVC via Visual Studio 2022 or Visual Studio 2026
 
 ### 💻 Setup
 
@@ -46,20 +48,39 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
    pip install -r requirements.txt
    ```
 
-2.  Initialize the script via terminal:
+2. Compile the DxgiCapture **C++ DLL** via x64/x86 Native Tools Command Prompt for VS 2022/VS:
+   ```cmd
+   cl.exe /LD /O2 /Oi /Ot /GL /arch:AVX2 /fp:fast /GS- /Fosrc\native\ /Fdsrc\native\DxgiCapture.pdb src\native\DxgiCapture.cpp /link /LTCG /OPT:REF /OPT:ICF /OUT:src\native\DxgiCapture.dll /IMPLIB:src\native\DxgiCapture.lib
+   ```
+
+> [!IMPORTANT]
+> You must compile the DLL for the same architecture as your Python interpreter. To check your version, run:  
+>
+> `python -c "import platform; print(platform.architecture()[0])"`
+
+3.  Initialize the script via terminal:
     ```powershell
     python -O program.pyw
     ```
 
 #### Optional:
 
-* Use Python MSS instead of BetterCam (Not recommended):  
-   BetterCam is the default frame provider for the Præstantia Summa 2 Engine. You can still use Python MSS from the Præstantia Summa 1 Engine without writing your own IFrameProvider, but the performance benchmark is lower.
+* Frame Provider:
+  * Use BetterCam instead of DxgiCapture:  
+    Our native DxgiCapture, written in C++, is the default frame provider for the Præstantia Summa 2 Engine. For convenience, you can use BetterCam without writing your own IFrameProvider, but the performance benchmark is lower.
 
-    ```powershell
-    pip install mss==10.1.0
-    $env:FRAME_PROVIDER = "src.services.python_mss_frame_provider.PythonMssFrameProvider"
-    ```
+      ```powershell
+      pip install bettercam==1.0.0
+      $env:FRAME_PROVIDER = "src.services.bettercam_frame_provider.BetterCamFrameProvider"
+      ```
+
+  * Use Python MSS instead of DxgiCapture (Not recommended):  
+    Our native DxgiCapture, written in C++, is the default frame provider for the Præstantia Summa 2 Engine. You can still use Python MSS from the Præstantia Summa 1 Engine without writing your own IFrameProvider, but the performance benchmark is lower.
+
+      ```powershell
+      pip install mss==10.1.0
+      $env:FRAME_PROVIDER = "src.services.python_mss_frame_provider.PythonMssFrameProvider"
+      ```
 
 -----
 
