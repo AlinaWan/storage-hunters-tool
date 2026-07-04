@@ -10,7 +10,7 @@ class FocusWindowResult(Enum):
 @sealed
 class WindowController():
     @staticmethod
-    def focus_window(pid: int, hwnd: int) -> FocusWindowResult:
+    def focus_window(hwnd: int) -> FocusWindowResult:
         if hwnd is None:
             return FocusWindowResult.NO_VISIBLE_WINDOW
 

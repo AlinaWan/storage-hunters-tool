@@ -71,7 +71,7 @@ class Application(LoggerMixin, IApplication):
         if not self.is_active:
             if (pid := ProcessLocator.get_process_pid("RobloxPlayerBeta.exe", require_visible=True)) is not None:
                 hwnd = NativeMethods.get_hwnd_from_pid(pid, require_visible=True)
-                result = WindowController.focus_window(pid, hwnd)
+                result = WindowController.focus_window(hwnd)
                 match result:
                     case FocusWindowResult.SUCCESS:
                         self.logger.info(f"Successfully focused primary window container handle ({hwnd}) for PID {pid}.")
@@ -236,7 +236,7 @@ class Application(LoggerMixin, IApplication):
         # focus on launch for convinience
         if (pid := ProcessLocator.get_process_pid("RobloxPlayerBeta.exe", require_visible=True)) is not None:
             hwnd = NativeMethods.get_hwnd_from_pid(pid, require_visible=True)
-            result = WindowController.focus_window(pid, hwnd)
+            result = WindowController.focus_window(hwnd)
             match result:
                 case FocusWindowResult.SUCCESS:
                     self.logger.info(f"Successfully focused primary window container handle ({hwnd}) for PID {pid}.")
