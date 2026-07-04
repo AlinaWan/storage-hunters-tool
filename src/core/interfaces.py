@@ -1,6 +1,7 @@
 import logging
+from typing import Protocol, runtime_checkable, Callable as Action, Tuple, Optional
 
-from typing import Protocol, runtime_checkable
+import numpy as np
 
 class IApplication(Protocol):
     def run(self) -> None: ...
@@ -15,6 +16,10 @@ class IApplicationOrchestrator(Protocol):
 
 class IDisposable(Protocol):
     def dispose(self) -> None: ...
+
+class IFrameProvider(Protocol):
+    def grab(self, region: Tuple[int, int, int, int]) -> Optional[np.ndarray]: ...
+    def close(self) -> None: ...
 
 @runtime_checkable
 class ILogger(Protocol):

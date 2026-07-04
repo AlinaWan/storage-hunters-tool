@@ -4,12 +4,11 @@ from typing import final as sealed
 
 import cv2
 import numpy as np
-import bettercam
 
 from src.core.config import Config
 from src.core.config_handler import ConfigHandler
 from src.core.constants import Constants
-from src.core.interfaces import IApplication
+from src.core.interfaces import IApplication, ILoggerFactory, IFrameProvider
 from src.core.native_methods import NativeMethods
 from src.dtos.config_runtime_state_dto import ConfigRuntimeStateDto
 from src.dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
@@ -28,8 +27,9 @@ from src.utils.window_controller import WindowController, FocusWindowResult
 
 @sealed
 class Application(LoggerMixin, IApplication):
-    def __init__(self, factory):
-        self.logger_factory = factory
+    def __init__(self, logger_factory: ILoggerFactory, frame_provider: IFrameProvider):
+        self.logger_factory = logger_factory
+        self._frame_provider = frame_provider
         self.mutex_handle = None
 
         self.menu = None
@@ -246,7 +246,7 @@ class Application(LoggerMixin, IApplication):
             self.logger.warning("RobloxPlayerBeta.exe process was not detected to focus.")
 
         # initialize bettercam with BGRA output format to match OpenCV pipeline
-        camera = bettercam.create(output_color="BGRA")
+        camera = self._frame_provider
 
         while not self.should_exit:
             self.recache_manager.flush()
@@ -533,7 +533,7 @@ class Application(LoggerMixin, IApplication):
                 else:
                     marker.hide()
 
-        del camera
+        self._frame_provider.close()
         if self.hotkey_listener:
             self.hotkey_listener.stop()
         if self.discord_rpc_service:
@@ -558,4 +558,3 @@ class Application(LoggerMixin, IApplication):
         if self.mutex_handle:
             NativeMethods.release_mutex(self.mutex_handle)
             NativeMethods.close_handle(self.mutex_handle)
-

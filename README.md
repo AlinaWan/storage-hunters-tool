@@ -51,6 +51,16 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
     python -O program.pyw
     ```
 
+#### Optional:
+
+* Use Python MSS instead of BetterCam (Not recommended):  
+   BetterCam is the default frame provider for the Præstantia Summa 2 Engine. You can still use Python MSS from the Præstantia Summa 1 Engine without writing your own IFrameProvider, but the performance benchmark is lower.
+
+    ```powershell
+    pip install mss==10.1.0
+    $env:FRAME_PROVIDER = "src.services.python_mss_frame_provider.PythonMssFrameProvider"
+    ```
+
 -----
 
 ## ⌨️ Controls
