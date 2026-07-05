@@ -90,6 +90,7 @@ class NativeMethods:
     _dwmapi: ReadOnly = ctypes.WinDLL("dwmapi")
     _kernel32: ReadOnly = ctypes.WinDLL("kernel32")
     _psapi: ReadOnly = ctypes.WinDLL("psapi")
+    _shell32: ReadOnly = ctypes.WinDLL("shell32")
     _user32: ReadOnly = ctypes.WinDLL("user32")
 
     _DWMWA_WINDOW_CORNER_PREFERENCE: ReadOnly = 33
@@ -150,6 +151,9 @@ class NativeMethods:
     _SW_FORCEMINIMIZE: ReadOnly = 0x0B
     _SW_MAX: ReadOnly = 0x0B
 
+    _GWL_WNDPROC: ReadOnly = -4
+    _WM_DROPFILES: ReadOnly = 0x0233
+
     _FILE_FLAG_OVERLAPPED: ReadOnly = 0x40000000
     _WAIT_OBJECT_0: ReadOnly = 0x00000000
     _INFINITE: ReadOnly = 0xFFFFFFFF
@@ -185,6 +189,8 @@ class NativeMethods:
 
     WM_QUIT: ReadOnly = 0x0012
     WM_HOTKEY: ReadOnly = 0x0312
+
+    _WNDPROC_FUNC = ctypes.WINFUNCTYPE(ctypes.c_int64, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM)
 
     _advapi32.InitiateSystemShutdownExW.argtypes = [wintypes.LPWSTR, wintypes.LPWSTR, wintypes.DWORD, wintypes.BOOL, wintypes.BOOL, wintypes.DWORD]
     _advapi32.InitiateSystemShutdownExW.restype = wintypes.BOOL
@@ -326,6 +332,26 @@ class NativeMethods:
 
     _user32.IsIconic.argtypes = [wintypes.HWND]
     _user32.IsIconic.restype = wintypes.BOOL
+
+    if ctypes.sizeof(ctypes.c_void_p) == 8:
+        _user32.SetWindowLongPtrW.argtypes = [wintypes.HWND, ctypes.c_int, ctypes.c_void_p]
+        _user32.SetWindowLongPtrW.restype = ctypes.c_void_p
+        _user32.CallWindowProcW.argtypes = [ctypes.c_void_p, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
+        _user32.CallWindowProcW.restype = ctypes.c_int64
+    else:
+        _user32.SetWindowLongW.argtypes = [wintypes.HWND, ctypes.c_int, ctypes.c_long]
+        _user32.SetWindowLongW.restype = ctypes.c_long
+        _user32.CallWindowProcW.argtypes = [ctypes.c_long, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
+        _user32.CallWindowProcW.restype = ctypes.c_long
+
+    _shell32.DragAcceptFiles.argtypes = [wintypes.HWND, wintypes.BOOL]
+    _shell32.DragAcceptFiles.restype = None
+
+    _shell32.DragQueryFileW.argtypes = [wintypes.HANDLE, wintypes.UINT, wintypes.LPWSTR, wintypes.UINT]
+    _shell32.DragQueryFileW.restype = wintypes.UINT
+
+    _shell32.DragFinish.argtypes = [wintypes.HANDLE]
+    _shell32.DragFinish.restype = None
 
     # Memory management related methods
     @staticmethod
@@ -834,3 +860,39 @@ class NativeMethods:
         inp.un.ki = KEYBDINPUT(0, scan_code, flags, 0, 0)
     
         NativeMethods._user32.SendInput(1, ctypes.pointer(inp), ctypes.sizeof(INPUT))
+
+    @staticmethod
+    def register_drag_drop(hwnd: int, callback) -> ctypes.c_void_p:
+        NativeMethods._shell32.DragAcceptFiles(hwnd, True)
+
+        proc_container = [None]
+
+        def wnd_proc(hWnd, uMsg, wParam, lParam):
+            if uMsg == NativeMethods._WM_DROPFILES:
+                hDrop = wintypes.HANDLE(wParam)
+                count = NativeMethods._shell32.DragQueryFileW(hDrop, 0xFFFFFFFF, None, 0)
+                if count > 0:
+                    length = NativeMethods._shell32.DragQueryFileW(hDrop, 0, None, 0)
+                    buf = ctypes.create_unicode_buffer(length + 1)
+                    NativeMethods._shell32.DragQueryFileW(hDrop, 0, buf, length + 1)
+                    
+                    NativeMethods._shell32.DragFinish(hDrop)
+                    callback(buf.value)
+                return 0
+
+            old_handler = proc_container[0]
+            if old_handler is not None:
+                if ctypes.sizeof(ctypes.c_void_p) == 8:
+                    return NativeMethods._user32.CallWindowProcW(old_handler, hWnd, uMsg, wParam, lParam)
+                return NativeMethods._user32.CallWindowProcW(old_handler, hWnd, uMsg, wParam, lParam)
+            return 0
+
+        NativeMethods._active_dnd_proc = NativeMethods._WNDPROC_FUNC(wnd_proc)
+        
+        if ctypes.sizeof(ctypes.c_void_p) == 8:
+            old_proc = NativeMethods._user32.SetWindowLongPtrW(hwnd, NativeMethods._GWL_WNDPROC, ctypes.cast(NativeMethods._active_dnd_proc, ctypes.c_void_p))
+        else:
+            old_proc = NativeMethods._user32.SetWindowLongW(hwnd, NativeMethods._GWL_WNDPROC, ctypes.cast(NativeMethods._active_dnd_proc, ctypes.c_long))
+            
+        proc_container[0] = old_proc
+        return old_proc

@@ -129,11 +129,14 @@ class ConfigHandler(LoggerMixin):
         except Exception as _:
             self.logger.exception(f"Reload error for {os.path.basename(path)}")
 
-    def load_config(self):
-        path = filedialog.askopenfilename(
-            initialdir=Constants.SCRIPT_DIR,
-            filetypes=[("JSON Config", "*.json")]
-        )
+    def load_config(self, path: str | None = None):
+        # If no path was passed (clicked via UI button), open the file dialog
+        # else, the file was drag-dropped and the path is passed
+        if not path:
+            path = filedialog.askopenfilename(
+                initialdir=Constants.SCRIPT_DIR,
+                filetypes=[("JSON Config", "*.json")]
+            )
 
         if not path:
             return

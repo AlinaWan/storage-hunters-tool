@@ -150,6 +150,20 @@ The Præstantia Summa 2 Engine used in this project significantly improves upon 
    * Single-responsibility application factory, application orchestrator, and application to manage lifecycle and controlled dependency injection.
    * OCP-compliant frame provider system is swappable without changing any business logic, provided your frame provider follows the IFrameProvider contract.
      * Our in-house C++ DXGI capture DLL can reach over 500 FPS in practice and is several times faster than BetterCam & Python MSS.
+   * Zero-dependency architecture. To fight against bloat, supply chain attacks, and slow performance, the only third-party dependencies the Præstantia Summa 2 Engine uses are the heavily scrutinized & vetted NumPy and OpenCV libraries.
+     * File drag-drop: Instead of TkinterDnD2, we use Shell32 & User32.
+     * Discord rich presence: Instead of pypresence, we use Kernel32 & MemoryView.
+     * Discord wekhooks: Instead of Requests, we use urllib.request.
+     * Frame capture: Instead of Python MSS or BetterCam, we use DXGI & Direct3D 11 API via a C++ DLL.
+     * Hotkey registration: Instead of keyboard, we use User32.
+     * Input simulation: Instead of AHK or pynput, we use User32.
+     * Math evaluator: Instead of simpleeval, we use ast.
+     * Process monitoring: Instead of psutil, we use User32.
+     * Directory monitoring: Instead of watchdog, we use Kernel32.
+     * Window control: Instead of PyWin32, we use User32.
+     * System control: We use AdvApi32 & Kernel32.
+     * Message boxes: We use User32.
+     * Interfaces: We use typing.Protocol.
 
 </details>
 

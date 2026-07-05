@@ -40,6 +40,7 @@ class MenuOverlay:
             self.root.update_idletasks()
             hwnd = NativeMethods.get_parent(self.root.winfo_id()) # Get the actual window handle to apply
             NativeMethods.apply_rounded_corners(hwnd)
+            NativeMethods.register_drag_drop(hwnd, load_callback) # register this hwnd for drag drop
         except Exception:
             pass
 
