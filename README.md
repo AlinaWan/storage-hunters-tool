@@ -148,6 +148,8 @@ The Præstantia Summa 2 Engine used in this project significantly improves upon 
      * The logger factory, logger provider, and logging formatter are fully decoupled and abstracted, enabling you to swap in your own provider or formatter for logging to ELK Stack, CloudWatch, Splunk, etc.
      * Multiple providers can be added to the logger factory at the same time.
    * Single-responsibility application factory, application orchestrator, and application to manage lifecycle and controlled dependency injection.
+   * OCP-compliant frame provider system is swappable without changing any business logic, provided your frame provider follows the IFrameProvider contract.
+     * Our in-house C++ DXGI capture DLL can reach over 500 FPS in practice and is several times faster than BetterCam & Python MSS.
 
 </details>
 

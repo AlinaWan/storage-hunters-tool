@@ -201,6 +201,9 @@ class NativeMethods:
     _advapi32.AdjustTokenPrivileges.argtypes = [wintypes.HANDLE, wintypes.BOOL, ctypes.c_void_p, wintypes.DWORD, ctypes.c_void_p, ctypes.c_void_p]
     _advapi32.AdjustTokenPrivileges.restype = wintypes.BOOL
 
+    _advapi32.GetUserNameW.argtypes = [wintypes.LPWSTR, wintypes.LPDWORD]
+    _advapi32.GetUserNameW.restype = wintypes.BOOL
+
     _dwmapi.DwmSetWindowAttribute.argtypes = [wintypes.HWND, wintypes.DWORD, ctypes.c_void_p, wintypes.DWORD]
     _dwmapi.DwmSetWindowAttribute.restype = ctypes.HRESULT
 
@@ -675,6 +678,13 @@ class NativeMethods:
     @staticmethod
     def abort_system_shutdown():
         return NativeMethods._advapi32.AbortSystemShutdownW(None)
+
+    def get_current_username():
+        # UNLEN is defined in Lmcons.h (256) + null terminator.
+        size = wintypes.DWORD(257)
+        buffer = ctypes.create_unicode_buffer(size.value)
+        NativeMethods._advapi32.GetUserNameW(buffer, ctypes.byref(size))
+        return buffer.value
 
     # Window management related processes
     @staticmethod

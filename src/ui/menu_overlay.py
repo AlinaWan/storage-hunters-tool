@@ -2,6 +2,7 @@ import tkinter as tk
 from typing import final as sealed
 
 from src.core.native_methods import NativeMethods
+from src.utils.date_time_util import DateTimeUtil
 
 @sealed
 class MenuOverlay:
@@ -14,12 +15,17 @@ class MenuOverlay:
         self.root.attributes("-topmost", True)
         self.root.resizable(False, False)
         self.alive = True
+        self.after_ids = []
+
+        # Bind Escape key to close the overlay instantly
+        self.root.bind("<Escape>", lambda e: self.toggle())
 
         BG_COLOR = "#f8f9fa"
         TEXT_DARK = "#212529"
         LABEL_GREY = "#6c757d"
         BORDER_COLOR = "#dee2e6"
         PRESSED_COLOR = "#e9ecef"
+        HOVER_COLOR = "#f1f3f5"  # subtle hover state color
 
         self.root.configure(bg=BG_COLOR)
 
@@ -37,15 +43,29 @@ class MenuOverlay:
         except Exception:
             pass
 
-        header = tk.Label(
-            self.root,
+        # Create a container frame for the headers to anchor them to the same exact grid space
+        header_container = tk.Frame(self.root, bg=BG_COLOR)
+        header_container.pack(pady=10)
+        header_container.grid_columnconfigure(0, weight=1)
+        header_container.grid_rowconfigure(0, weight=1)
+
+        self.greeting = tk.Label(
+            header_container,
+            text="",
+            font=("Segoe UI Variable Display", 15, "bold"),
+            fg=BG_COLOR,
+            bg=BG_COLOR
+        )
+        self.greeting.grid(row=0, column=0, sticky="nsew")
+
+        self.header = tk.Label(
+            header_container,
             text="What would you like to do?",
             font=("Segoe UI Variable Display", 15, "bold"),
-            fg=TEXT_DARK,
-            bg=BG_COLOR,
-            pady=10
+            fg=BG_COLOR,
+            bg=BG_COLOR
         )
-        header.pack()
+        self.header.grid(row=0, column=0, sticky="nsew")
 
         btn_frame = tk.Frame(self.root, bg=BG_COLOR)
         btn_frame.pack(pady=5)
@@ -55,8 +75,6 @@ class MenuOverlay:
             return canvas.create_polygon(points, smooth=True, **kwargs)
 
         def create_button(parent, emoji, label_text, color, command, validator=None):
-            self.after_ids = []
-
             size = 110
             radius = 20
 
@@ -76,13 +94,20 @@ class MenuOverlay:
             original_label = label_text
             original_emoji = emoji # noqa: F841
 
+            # Visual feedback states
+            def on_enter(e):
+                canvas.itemconfig(rect, fill=HOVER_COLOR)
+
+            def on_leave(e):
+                canvas.itemconfig(rect, fill="white")
+
             def on_press(e):
                 canvas.itemconfig(rect, fill=PRESSED_COLOR)
                 canvas.move(icon, 1, 1)
                 canvas.move(txt, 1, 1)
 
             def on_release(e):
-                canvas.itemconfig(rect, fill="white")
+                canvas.itemconfig(rect, fill=HOVER_COLOR) # Snap back to hover state color, not blank white
                 canvas.move(icon, -1, -1)
                 canvas.move(txt, -1, -1)
 
@@ -106,6 +131,8 @@ class MenuOverlay:
                 after_id = canvas.after(duration, restore)
                 self.after_ids.append(after_id)
 
+            canvas.bind("<Enter>", on_enter)
+            canvas.bind("<Leave>", on_leave)
             canvas.bind("<Button-1>", on_press)
             canvas.bind("<ButtonRelease-1>", on_release)
 
@@ -119,6 +146,74 @@ class MenuOverlay:
         self.visible = False
         self.toggle_requested = False
 
+    def _blend(self, start, end, t):
+        s = tuple(int(start[i:i+2], 16) for i in (1,3,5))
+        e = tuple(int(end[i:i+2], 16) for i in (1,3,5))
+
+        rgb = tuple(
+            int(s[i] + (e[i] - s[i]) * t)
+            for i in range(3)
+        )
+
+        return "#%02x%02x%02x" % rgb
+
+    def fade_label(self, label, fade_in=True, duration=350, callback=None):
+        steps = 20
+        delay = duration // steps
+
+        def step(i):
+            t = i / steps
+
+            if not fade_in:
+                t = 1 - t
+
+            color = self._blend("#f8f9fa", "#212529", t)
+            try:
+                label.configure(fg=color)
+            except tk.TclError:
+                return
+
+            if i < steps:
+                after_id = self.root.after(delay, lambda: step(i + 1))
+                self.after_ids.append(after_id)
+            elif callback:
+                callback()
+
+        step(0)
+
+    def play_header_animation(self):
+        # Lift greeting to the top of the stack so it hides the header label underneath it
+        self.greeting.tkraise()
+        
+        greeting_text = f"{DateTimeUtil.get_greeting()}, {NativeMethods.get_current_username()}"
+
+        self.greeting.configure(
+            text=greeting_text,
+            fg="#f8f9fa"
+        )
+
+        self.header.configure(fg="#f8f9fa")
+
+        self.fade_label(
+            self.greeting,
+            True,
+            callback=lambda:
+                # Save this transition pause ID so rapid open/closes clear cleanly
+                self.after_ids.append(
+                    self.root.after(
+                        900,
+                        lambda:
+                            self.fade_label(
+                                self.greeting,
+                                False,
+                                callback=lambda:
+                                    # Raise the header back to the top right before fading it in
+                                    (self.header.tkraise(), self.fade_label(self.header, True))
+                            )
+                    )
+                )
+        )
+
     def toggle(self):
         self.toggle_requested = True
 
@@ -128,9 +223,18 @@ class MenuOverlay:
 
         try:
             if self.visible:
+                for after_id in self.after_ids:
+                    try:
+                        self.root.after_cancel(after_id)
+                    except Exception:
+                        pass
+                self.after_ids.clear()
                 self.root.withdraw()
             else:
                 self.root.deiconify()
+                # Focus window on open so keyboard bindings like <Escape> work immediately
+                self.root.focus_force() 
+                self.play_header_animation()
             self.visible = not self.visible
         except tk.TclError:
             self.alive = False
