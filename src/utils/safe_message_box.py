@@ -27,17 +27,15 @@ class SafeMessageBox():
         def worker():
             try:
                 worker_path = os.path.join(
-                    os.path.dirname(__file__),
-                    "message_box_worker.py"
+                    "src\\native\\MessageBoxWorker.exe"
                 )
 
-                proc = subprocess.Popen(
-                    [
-                        sys.executable,
-                        worker_path,
-                        text,
-                        title,
-                        str(flags)
+                proc = subprocess.Popen(  
+                    [  
+                        worker_path,  
+                        text,  
+                        title,  
+                        str(flags)  
                     ],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
@@ -62,17 +60,15 @@ class SafeMessageBox():
     def show_message_box_sync(text, title, flags):
         try:
             worker_path = os.path.join(
-                os.path.dirname(__file__),
-                "message_box_worker.py"
+                "src\\native\\MessageBoxWorker.exe"
             )
 
-            proc = subprocess.Popen(
-                [
-                    sys.executable,
-                    worker_path,
-                    text,
-                    title,
-                    str(flags)
+            proc = subprocess.Popen(  
+                [  
+                    worker_path,  
+                    text,  
+                    title,  
+                    str(flags)  
                 ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

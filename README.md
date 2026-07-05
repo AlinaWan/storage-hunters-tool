@@ -40,6 +40,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 - Windows 10 or 11
 - Python 3.10 or higher
 - MSVC via Visual Studio 2022 or Visual Studio 2026
+- Windows SDK (usually comes with the Desktop development with C++ workload)
 
 ### 💻 Setup
 
@@ -48,9 +49,10 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
    pip install -r requirements.txt
    ```
 
-2. Compile the DxgiCapture **C++ DLL** via x64/x86 Native Tools Command Prompt for VS 2022/VS:
+2. Compile the **C++ files** via x64/x86 Native Tools Command Prompt for VS 2022/VS:
    ```cmd
-   cl.exe /LD /O2 /Oi /Ot /GL /arch:AVX2 /fp:fast /GS- /Fosrc\native\ /Fdsrc\native\DxgiCapture.pdb src\native\DxgiCapture.cpp /link /LTCG /OPT:REF /OPT:ICF /OUT:src\native\DxgiCapture.dll /IMPLIB:src\native\DxgiCapture.lib
+   cl /LD /O2 /Oi /Ot /GL /arch:AVX2 /fp:fast /GS- /Fosrc\native\ /Fdsrc\native\DxgiCapture.pdb src\native\DxgiCapture.cpp /link /LTCG /OPT:REF /OPT:ICF /OUT:src\native\DxgiCapture.dll /IMPLIB:src\native\DxgiCapture.lib
+   cl /O2 /Oi /Oy /MT /EHsc /GS- /DNDEBUG /Fesrc\native\MessageBoxWorker.exe /Fosrc\native\ src\native\MessageBoxWorker.cpp /link /OPT:REF /OPT:ICF /SUBSYSTEM:CONSOLE user32.lib /ENTRY:WinMainCRTStartup
    ```
 
 > [!IMPORTANT]
