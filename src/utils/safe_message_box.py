@@ -15,7 +15,7 @@ import threading
 from enum import Enum, auto
 from typing import final as sealed
 
-class MessageBoxOutcome(Enum):
+class MessageBoxResult(Enum):
     SUCCESS = auto()
     WORKER_CRASHED = auto()
     EXECUTION_FAILED = auto()
@@ -29,7 +29,6 @@ class SafeMessageBox():
                 worker_path = os.path.join(
                     "src\\native\\MessageBoxWorker.exe"
                 )
-
                 proc = subprocess.Popen(  
                     [  
                         worker_path,  
@@ -45,14 +44,14 @@ class SafeMessageBox():
                 stdout, stderr = proc.communicate()
 
                 if proc.returncode != 0:
-                    callback((MessageBoxOutcome.WORKER_CRASHED, None))
+                    callback((MessageBoxResult.WORKER_CRASHED, None))
                     return
 
                 result = int(stdout.strip())
-                callback((MessageBoxOutcome.SUCCESS, result))
+                callback((MessageBoxResult.SUCCESS, result))
 
             except Exception:
-                callback((MessageBoxOutcome.EXECUTION_FAILED, None))
+                callback((MessageBoxResult.EXECUTION_FAILED, None))
 
         threading.Thread(target=worker, daemon=True).start()
 
@@ -78,9 +77,9 @@ class SafeMessageBox():
             stdout, stderr = proc.communicate()
 
             if proc.returncode != 0:
-                return MessageBoxOutcome.WORKER_CRASHED, None
+                return MessageBoxResult.WORKER_CRASHED, None
 
-            return MessageBoxOutcome.SUCCESS, int(stdout.strip())
+            return MessageBoxResult.SUCCESS, int(stdout.strip())
 
         except Exception:
-            return MessageBoxOutcome.EXECUTION_FAILED, None
+            return MessageBoxResult.EXECUTION_FAILED, None

@@ -4,9 +4,10 @@ from typing import final as sealed, override
 from src.core.config import Config
 from src.core.interfaces import IDisposable
 from src.core.native_methods import NativeMethods
+from src.utils.logger_mixin import LoggerMixin
 
 @sealed
-class HotkeyListener(threading.Thread, IDisposable):
+class HotkeyListener(threading.Thread, LoggerMixin, IDisposable):
     def __init__(
         self,
         toggle_cb,
@@ -69,7 +70,7 @@ class HotkeyListener(threading.Thread, IDisposable):
                     f"{name} (ID: {hk_id})"
                 )
 
-        self.success = registered > 0
+        self.success = registered == len(hotkeys)
         self.status_event.set()
 
         return registered > 0

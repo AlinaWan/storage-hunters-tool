@@ -22,7 +22,7 @@ from src.ui.scan_area_overlay import ScanAreaOverlay
 from src.ui.tooltip_marker import TooltipMarker
 from src.utils.logger_mixin import LoggerMixin
 from src.utils.process_locator import ProcessLocator
-from src.utils.safe_message_box import SafeMessageBox
+from src.utils.safe_message_box import SafeMessageBox, MessageBoxResult
 from src.utils.window_controller import WindowController, FocusWindowResult
 
 @sealed
@@ -98,12 +98,15 @@ class Application(LoggerMixin, IApplication):
 
     def _handle_hotkey_retry(self):
         def on_result(result):
-            if result == NativeMethods.IDRETRY:  # Retry clicked
+            outcome, button = result
+            if outcome != MessageBoxResult.SUCCESS:
+                self.logger.warning(f"Message box failed: {outcome}")
+                return
+            if button == NativeMethods.IDRETRY:
                 self.logger.info("Retrying hotkey registration...")
                 self._update_hotkey_registration()
             else:
                 self.logger.info("User bypassed hotkey warning configuration.")
-
         SafeMessageBox.show_message_box_async(
             "Failed to register one or more hotkeys.\n\n"
             "This is usually because another program is already using them. "
@@ -187,9 +190,6 @@ class Application(LoggerMixin, IApplication):
                     "menu": (Config.MENU_MOD, Config.MENU_KEY),
                     "debug": (Config.DEBUG_MOD, Config.DEBUG_KEY)
                 }
-
-                if current_config == self.last_hotkey_config and self.hotkey_listener is not None:
-                    return
 
                 self.logger.info("Registering hotkeys...")
 
