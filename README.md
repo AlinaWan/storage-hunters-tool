@@ -140,7 +140,7 @@ The Præstantia Summa 2 Engine used in this project significantly improves upon 
    * Follows the inversion of control (IoC) principle
    * Follows the principle of least astonishment (POLA)
 
- * Core Architecture:
+ * Core Engine Architecture:
    * Languages used:
      * Python
      * C++
@@ -168,6 +168,10 @@ The Præstantia Summa 2 Engine used in this project significantly improves upon 
      * System control: We use AdvApi32 & Kernel32.
      * Message boxes: We use User32.
      * Interfaces: We use typing.Protocol.
+   * The adherence to the core design principles is designed to make the engine easily reusable and separable from the application-specific implementation. For instance, services and monitors rely only on the caller to dictate what data to use, while the callee only handles it.
+
+ * Storage Hunters Tool Application-Specific Architecture
+   * threshold.asm uses register-based SIMD vectorization to bypass memory bus latency. Rather than transmitting signals across the bus, the threshold procedure reads from the XMM1 through XMM3 registers.
 
 </details>
 
