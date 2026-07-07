@@ -85,6 +85,7 @@ class INPUT(ctypes.Structure):
 
 @sealed
 class NativeMethods:
+    """Windows DLL platform native methods."""
 
     _advapi32: ReadOnly = ctypes.WinDLL("advapi32")
     _dwmapi: ReadOnly = ctypes.WinDLL("dwmapi")

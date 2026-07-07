@@ -55,9 +55,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 
 2. Compile the **C++ & x86-64 Assembly files** via x64 Native Tools Command Prompt for VS 2022/VS:
    ```cmd
-   cl /LD /O2 /Oi /Ot /GL /arch:AVX2 /fp:fast /GS- /Fosrc\native\ /Fdsrc\native\DxgiCapture.pdb src\native\DxgiCapture.cpp /link /LTCG /OPT:REF /OPT:ICF /OUT:src\native\DxgiCapture.dll /IMPLIB:src\native\DxgiCapture.lib
-   cl /O2 /Oi /Oy /MT /EHsc /GS- /DNDEBUG /Fesrc\native\MessageBoxWorker.exe /Fosrc\native\ src\native\MessageBoxWorker.cpp /link /OPT:REF /OPT:ICF /SUBSYSTEM:CONSOLE user32.lib /ENTRY:WinMainCRTStartup
-   ml64 /Fosrc\native\threshold.obj src\native\threshold.asm /link /DLL /NOENTRY /DEF:src\native\threshold.def /OUT:src\native\threshold.dll /IMPLIB:src\native\threshold.lib
+   build_native.cmd
    ```
 
 3.  Initialize the script via terminal:

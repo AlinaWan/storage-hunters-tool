@@ -304,7 +304,7 @@ class Application(LoggerMixin, IApplication):
             
             # ASM
             # dumpbin /exports src\native\threshold.dll
-            LocalNativeMethods.threshold_lib.threshold(
+            LocalNativeMethods.stvision.threshold(
                 slice_gray_contig.ctypes.data,
                 mask_buffer.ctypes.data,
                 h * w,

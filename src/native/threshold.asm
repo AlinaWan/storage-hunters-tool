@@ -5,32 +5,31 @@ PUBLIC threshold
 .code
 
 ; void threshold(const uint8_t* src, uint8_t* dst, int length, uint8_t threshold);
-; RCX = src
-; RDX = dst
-; R8  = length
-; R9B = threshold
-
 threshold PROC
-
-    ; Build threshold vector (threshold ^ 0x80 repeated 16 times)
+    ; threshold vector (threshold ^ 0x80)
     movzx eax, r9b
     xor al, 80h
-
+    
+    ; broadcast the threshold to XMM1
     movd xmm1, eax
     punpcklbw xmm1, xmm1
     punpcklbw xmm1, xmm1
     punpcklwd xmm1, xmm1
     punpckldq xmm1, xmm1
 
+    ; generate the 0x80 constant in XMM3 for reuse
+    pcmpeqd xmm3, xmm3     ; xmm3 = 0xFF...FF
+    psllw   xmm3, 7        ; xmm3 = 0x8080...80 (16 bytes of 0x80)
+
     mov r10, r8          ; Save original length
     shr r8, 4            ; Number of 16-byte blocks
     jz tail_loop
 
 loop_proc:
-    movdqu xmm2, [rcx]
-    pxor xmm2, xmmword ptr [xor_val]
+    movdqu xmm2, [rcx]     ; Load 16 bytes
+    pxor    xmm2, xmm3
     pcmpgtb xmm2, xmm1
-    pand xmm2, xmmword ptr [mask80]    ; Convert 0xFF -> 0x80
+    pand    xmm2, xmm3
     movdqu [rdx], xmm2
 
     add rcx, 16
@@ -56,13 +55,5 @@ process_byte:
 
 done:
     ret
-
 threshold ENDP
-
-.data
-align 16
-
-xor_val db 16 dup(80h)
-mask80 db 16 dup(80h)
-
 END

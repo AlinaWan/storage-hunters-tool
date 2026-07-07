@@ -5,12 +5,9 @@ from typing import Final as ReadOnly, final as sealed
 
 @sealed
 class LocalNativeMethods:
+    """Local native methods for the specific Storage Hunters Tool application."""
 
-    threshold_lib: ReadOnly = ctypes.CDLL(Path(__file__).resolve().parent.parent / "native" / "threshold.dll")
+    stvision: ReadOnly = ctypes.CDLL(Path(__file__).resolve().parent.parent / "native" / "stvision.dll")
 
-    threshold_lib.threshold.argtypes = [
-        ctypes.c_void_p, # src
-        ctypes.c_void_p, # dst
-        ctypes.c_int,    # length
-        ctypes.c_uint8   # threshold
-    ]
+    stvision.threshold.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_uint8] # src, dst, length, threshold
+    stvision.threshold.restypes = None
