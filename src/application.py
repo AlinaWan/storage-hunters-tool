@@ -9,6 +9,7 @@ from src.core.config import Config
 from src.core.config_handler import ConfigHandler
 from src.core.constants import Constants
 from src.core.interfaces import IApplication, ILoggerFactory, IFrameProvider
+from src.core.local_native_methods import LocalNativeMethods
 from src.core.native_methods import NativeMethods
 from src.dtos.config_runtime_state_dto import ConfigRuntimeStateDto
 from src.dtos.discord_rpc_payload_dto import DiscordRpcPayloadDto
@@ -294,7 +295,24 @@ class Application(LoggerMixin, IApplication):
             slice_gray = gray[mid_y_start:mid_y_end, :]
             slice_val = hsv[mid_y_start:mid_y_end, :, 2]
 
-            line_mask = (slice_gray > 245)
+            # Ensure gray slice is C-contiguous for memory access
+            slice_gray_contig = np.ascontiguousarray(slice_gray, dtype=np.uint8)
+            h, w = slice_gray_contig.shape
+            
+            # Allocate the mask buffer (0xFF for True, 0x00 for False)
+            mask_buffer = np.zeros((h, w), dtype=np.uint8)
+            
+            # ASM
+            # dumpbin /exports src\native\threshold.dll
+            LocalNativeMethods.threshold_lib.threshold(
+                slice_gray_contig.ctypes.data,
+                mask_buffer.ctypes.data,
+                h * w,
+                245
+            )
+            
+            # Convert to bool for rest
+            line_mask = mask_buffer.astype(bool)
             line_cols = np.where(np.any(line_mask, axis=0))[0]
                 
             line_coords = None

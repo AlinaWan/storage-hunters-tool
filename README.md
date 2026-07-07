@@ -8,6 +8,7 @@
 [![License](https://img.shields.io/github/license/AlinaWan/bees-tool)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
 [![C++](https://img.shields.io/badge/C++-%2300599C.svg?logo=c%2B%2B&logoColor=white)](#)
+[![Assembly](https://custom-icon-badges.demolab.com/badge/-x86--64%20Assembly-000?logo=windows10&logoColor=white)](#)
 [![Visual Studio](https://custom-icon-badges.demolab.com/badge/Visual%20Studio-5C2D91.svg?&logo=visualstudio&logoColor=white)](#)
 [![Præstantia Summa 2](https://img.shields.io/badge/Engine-Præstantia_Summa_2-007FFF)](#)
 [![❤︎](https://img.shields.io/badge/Made%20with%20%E2%9D%A4%20by%20Riri-FFCAE9)](#)
@@ -38,9 +39,12 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 ### 📦 Sine Qua Non
 
 - Windows 10 or 11
-- Python 3.10 or higher
-- MSVC via Visual Studio 2022 or Visual Studio 2026
-- Windows SDK (usually comes with the Desktop development with C++ workload)
+- Python 3.10 or higher (x86-64)
+- Visual Studio 2022 or Visual Studio 2026
+- Desktop development with C++ workload for Visual Studio containing:
+  - Windows 10 or 11 SDK
+  - MSVC (cl.exe)
+  - MASM for x64 (ml64.exe)
 
 ### 💻 Setup
 
@@ -49,16 +53,12 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
    pip install -r requirements.txt
    ```
 
-2. Compile the **C++ files** via x64/x86 Native Tools Command Prompt for VS 2022/VS:
+2. Compile the **C++ & x86-64 Assembly files** via x64 Native Tools Command Prompt for VS 2022/VS:
    ```cmd
    cl /LD /O2 /Oi /Ot /GL /arch:AVX2 /fp:fast /GS- /Fosrc\native\ /Fdsrc\native\DxgiCapture.pdb src\native\DxgiCapture.cpp /link /LTCG /OPT:REF /OPT:ICF /OUT:src\native\DxgiCapture.dll /IMPLIB:src\native\DxgiCapture.lib
    cl /O2 /Oi /Oy /MT /EHsc /GS- /DNDEBUG /Fesrc\native\MessageBoxWorker.exe /Fosrc\native\ src\native\MessageBoxWorker.cpp /link /OPT:REF /OPT:ICF /SUBSYSTEM:CONSOLE user32.lib /ENTRY:WinMainCRTStartup
+   ml64 /Fosrc\native\threshold.obj src\native\threshold.asm /link /DLL /NOENTRY /DEF:src\native\threshold.def /OUT:src\native\threshold.dll /IMPLIB:src\native\threshold.lib
    ```
-
-> [!IMPORTANT]
-> You must compile the DLL for the same architecture as your Python interpreter. To check your version, run:  
->
-> `python -c "import platform; print(platform.architecture()[0])"`
 
 3.  Initialize the script via terminal:
     ```powershell
@@ -143,6 +143,10 @@ The Præstantia Summa 2 Engine used in this project significantly improves upon 
    * Follows the principle of least astonishment (POLA)
 
  * Core Architecture:
+   * Languages used:
+     * Python
+     * C++
+     * x86-64 Windows Assembly
    * Factory-provider based logger with three standard logging providers:
      * ConsoleLoggerProvider
      * FileLoggerProvider
