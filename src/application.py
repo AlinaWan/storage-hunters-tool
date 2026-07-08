@@ -253,6 +253,10 @@ class Application(LoggerMixin, IApplication):
         # initialize bettercam with BGRA output format to match OpenCV pipeline
         camera = self._frame_provider
 
+        # definitions to keep outside the loop
+        mask_buffer = None
+        kernel = np.ones((3, 3), np.uint8)
+
         while not self.should_exit:
             self.recache_manager.flush()
             self.debug_window.update()
@@ -285,27 +289,25 @@ class Application(LoggerMixin, IApplication):
                     self.frame_count = 0
                     self.fps_start_time = now
             
-            bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
-            gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
-            hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
-                
             mid_y_start = int(frame.shape[0] * 0.25)
             mid_y_end = int(frame.shape[0] * 0.75)
-                
-            slice_gray = gray[mid_y_start:mid_y_end, :]
-            slice_val = hsv[mid_y_start:mid_y_end, :, 2]
 
-            # Ensure gray slice is C-contiguous for memory access
-            slice_gray_contig = np.ascontiguousarray(slice_gray, dtype=np.uint8)
-            h, w = slice_gray_contig.shape
+            roi = frame[mid_y_start:mid_y_end]
+
+            slice_gray = cv2.cvtColor(roi, cv2.COLOR_BGRA2GRAY)
+            slice_val = np.maximum.reduce((roi[:, :, 0], roi[:, :, 1], roi[:, :, 2]))
+
+            # C-contiguous for memory access
+            h, w = slice_gray.shape
             
             # Allocate the mask buffer (0xFF for True, 0x00 for False)
-            mask_buffer = np.zeros((h, w), dtype=np.uint8)
+            if mask_buffer is None or mask_buffer.shape != (h, w):
+                mask_buffer = np.empty((h, w), dtype=np.uint8)
             
             # ASM
             # dumpbin /exports src\native\threshold.dll
             LocalNativeMethods.stvision.threshold(
-                slice_gray_contig.ctypes.data,
+                slice_gray.ctypes.data,
                 mask_buffer.ctypes.data,
                 h * w,
                 245
@@ -334,17 +336,15 @@ class Application(LoggerMixin, IApplication):
             min_width_pixels = search_area_width * (Config.MIN_TARGET_WIDTH_PCT / 100.0)
 
             # main masking
-            slice_val_8u = slice_val.astype(np.uint8)
             # otsu binarization
             _, target_pixel_mask = cv2.threshold(
-                slice_val_8u, 
-                0, 
-                255, 
+                slice_val,
+                0,
+                255,
                 cv2.THRESH_BINARY + cv2.THRESH_OTSU
             )
 
             # simple clean up using opening operation
-            kernel = np.ones((3, 3), np.uint8)
             target_pixel_mask = cv2.morphologyEx(
                 target_pixel_mask,
                 cv2.MORPH_OPEN,
@@ -421,7 +421,7 @@ class Application(LoggerMixin, IApplication):
                     info_str, 
                     target_coords=target_coords, 
                     click_data=self.latest_debug_click_data,
-                    current_frame=bgr[mid_y_start:mid_y_end, :]
+                    current_frame=roi
                 )
 
             if line_center_x is not None:

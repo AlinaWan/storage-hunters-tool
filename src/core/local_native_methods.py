@@ -10,4 +10,4 @@ class LocalNativeMethods:
     stvision: ReadOnly = ctypes.CDLL(Path(__file__).resolve().parent.parent / "native" / "stvision.dll")
 
     stvision.threshold.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_uint8] # src, dst, length, threshold
-    stvision.threshold.restypes = None
+    stvision.threshold.restype = None

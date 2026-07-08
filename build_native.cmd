@@ -1,2 +1,11 @@
-build_engine_native.cmd
-build_local_native.cmd
+@echo off
+echo [96m########################################### Starting engine build ###########################################[0m
+@echo on
+call build_engine_native.cmd
+@echo off
+echo [92m################################################ Engine done ################################################[0m
+echo [96m########################################### Starting local build ############################################[0m
+@echo on
+call build_local_native.cmd
+@echo off
+echo [92m################################################ Local done #################################################[0m
