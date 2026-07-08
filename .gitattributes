@@ -1,1 +1,3 @@
 build_native.cmd -linguist-detectable
+build_engine_native.cmd -linguist-detectable
+build_local_native.cmd -linguist-detectable

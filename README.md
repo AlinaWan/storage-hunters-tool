@@ -65,6 +65,14 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 
 #### Optional:
 
+* Initialize the app for development or debugging:
+   ```powershell
+   $env:PYTHONFAULTHANDLER=1
+   $env:ATTACHVSJITDEBUGGER=1
+   python program.pyw
+   ```
+  The program will halt execution immediately after launch (before creating or orchestrating the application) and resume after a debugger is attached.
+
 * Frame Provider:
   * Use BetterCam instead of DxgiCapture:  
     Our native DxgiCapture, written in C++, is the default frame provider for the Præstantia Summa 2 Engine. For convenience, you can use BetterCam without writing your own IFrameProvider, but the performance benchmark is lower.

@@ -3,8 +3,8 @@ __version__ = "1.0.0"
 __author__ = "Riri"
 __license__ = "MIT"
 
-import faulthandler
-faulthandler.enable()
+if __debug__:
+    __import__("src.utils.attach_vs_jit_debugger", fromlist=["AttachVsJitDebugger"]).AttachVsJitDebugger.run()
 
 from src.application_orchestrator import ApplicationOrchestrator
 from src.factories.application_factory import ApplicationFactory
