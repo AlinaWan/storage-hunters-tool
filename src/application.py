@@ -312,6 +312,8 @@ class Application(LoggerMixin, IApplication):
                 h * w,
                 245
             )
+
+            # ￣へ￣
             
             # Convert to bool for rest
             line_mask = mask_buffer.astype(bool)

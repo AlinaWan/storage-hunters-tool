@@ -18,8 +18,11 @@ threshold PROC
     punpckldq xmm1, xmm1
 
     ; generate the 0x80 constant in XMM3 for reuse
-    pcmpeqd xmm3, xmm3     ; xmm3 = 0xFF...FF
-    psllw   xmm3, 7        ; xmm3 = 0x8080...80 (16 bytes of 0x80)
+    mov eax, 80808080h
+    movd xmm3, eax
+    punpcklbw xmm3, xmm3
+    punpcklwd xmm3, xmm3
+    pshufd xmm3, xmm3, 0
 
     mov r10, r8          ; Save original length
     shr r8, 4            ; Number of 16-byte blocks
