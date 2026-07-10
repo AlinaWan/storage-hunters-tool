@@ -11,3 +11,6 @@ class LocalNativeMethods:
 
     stvision.threshold.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_uint8] # src, dst, length, threshold
     stvision.threshold.restype = None
+
+    stvision.find_line_bounds.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_void_p] # src, width, height, result_coords (pointer to array of 2 c_uint32)
+    stvision.find_line_bounds.restype = ctypes.c_uint32

@@ -360,6 +360,10 @@ class NativeMethods:
         return ctypes.create_string_buffer(size)
 
     @staticmethod
+    def create_uint32_array(count: int):
+        return (ctypes.c_uint32 * count)()
+
+    @staticmethod
     def byref(obj):
         return ctypes.byref(obj)
 

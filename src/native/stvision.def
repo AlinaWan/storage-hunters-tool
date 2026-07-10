@@ -1,3 +1,4 @@
 LIBRARY stvision
 EXPORTS
     threshold
+    find_line_bounds

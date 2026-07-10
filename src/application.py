@@ -256,6 +256,7 @@ class Application(LoggerMixin, IApplication):
         # definitions to keep outside the loop
         mask_buffer = None
         kernel = np.ones((3, 3), np.uint8)
+        result_buffer = NativeMethods.create_uint32_array(2) # allocated res buffer
 
         while not self.should_exit:
             self.recache_manager.flush()
@@ -315,17 +316,19 @@ class Application(LoggerMixin, IApplication):
 
             # ￣へ￣
             
-            # Convert to bool for rest
-            line_mask = mask_buffer.astype(bool)
-            line_cols = np.where(np.any(line_mask, axis=0))[0]
-                
             line_coords = None
             line_center_x = None
             line_confidence = 0.0
-                
-            if len(line_cols) > 0:
-                lx1 = int(np.min(line_cols))
-                lx2 = int(np.max(line_cols))
+
+            found = LocalNativeMethods.stvision.find_line_bounds(
+                mask_buffer.ctypes.data,
+                w,
+                h,
+                NativeMethods.byref(result_buffer)
+            )
+
+            if found:
+                lx1, lx2 = result_buffer[0], result_buffer[1]
                 if (lx2 - lx1) < Config.MAX_LINE_WIDTH_PX:
                     line_coords = (lx1, 2, lx2, frame.shape[0] - 2)
                     line_center_x = (lx1 + lx2) // 2
