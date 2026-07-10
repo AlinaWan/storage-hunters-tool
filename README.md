@@ -38,13 +38,20 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 
 ### 📦 Sine Qua Non
 
+#### Software
+
 - Windows 10 or 11
-- Python 3.10 or higher (x86-64)
+- Python 3.10 x86-64 or higher (3.14 recommended)
 - Visual Studio 2022 or Visual Studio 2026
 - Desktop development with C++ workload for Visual Studio containing:
   - Windows 10 or 11 SDK
   - MSVC (cl.exe)
   - MASM for x64 (ml64.exe)
+
+#### Hardware
+
+- A central x86-64 processor supporting the AVX2 instruction set
+- A graphics processing unit supporting the DirectX 11 API
 
 ### 💻 Setup
 
@@ -209,8 +216,8 @@ While all of the code is my own work, I owe some of the architectural choices to
 
 See Also:
  * Præstantia Summa Engine:
-   * [Storage Hunters Tool](https://github.com/AlinaWan/storage-hunters-tool) for [Storage Hunters](https://www.roblox.com/games/98800969324557)
-   * [Bees Tool](https://github.com/AlinaWan/bees-tool) for [Bees](https://www.roblox.com/games/92528179587394)
+   * [Storage Hunters Tool](https://github.com/AlinaWan/storage-hunters-tool) for [Storage Hunters](https://www.roblox.com/games/98800969324557) ![Præstantia Summa 2](https://img.shields.io/badge/-Præstantia_Summa_2-007FFF)
+   * [Bees Tool](https://github.com/AlinaWan/bees-tool) for [Bees](https://www.roblox.com/games/92528179587394) ![Præstantia Summa 1](https://img.shields.io/badge/-Præstantia_Summa_1-007FFF)
  * Other Tools:
    * [Mine Tool](https://github.com/AlinaWan/mine-tool) for [Mine](https://www.roblox.com/games/115694170181074)
    * [iamnotbobby](https://github.com/iamnotbobby)'s [Dig Tool](https://github.com/iamnotbobby/dig-tool) for [Dig](https://www.roblox.com/games/126244816328678)
