@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from tkinter import filedialog
 from typing import final as sealed
 
-from src.core.config import Config
+from src.core.config import Config, ConfigDefaults
 from src.core.constants import Constants
 from src.dtos.config_runtime_state_dto import ConfigRuntimeStateDto
 from src.utils.logger_mixin import LoggerMixin
@@ -23,48 +23,59 @@ class ConfigHandler(LoggerMixin):
         self.state = state
         self.evaluator = evaluator
 
+    def _evaluate_or_default(self, expression, default):
+        value = self.evaluator.evaluate(expression)
+        return default if value is None else value
+
     def apply_config(self, data):
-        # REMARK: (AlinaWan - 2026-07-16)
-        # In the future, the JSON value null should be able to
-        # be used to use the default values defined in src.core.config.Config.
-        # Right now, the Config class is a mutable DTO, so any implementation
-        # of this described feature might use copy.deepcopy to save the defaults.
+        defaults = ConfigDefaults.create_default_config_copy()
+
         a = data["automation_settings"]
-        Config.CLICK_COOLDOWN_MS = self.evaluator.evaluate(a["click_cooldown_ms"])
+        Config.CLICK_COOLDOWN_MS = self._evaluate_or_default(a["click_cooldown_ms"], defaults["CLICK_COOLDOWN_MS"])
         Config.CLICK_COORDINATE = {
-            "x": self.evaluator.evaluate(a["click_coordinate"]["x"]),
-            "y": self.evaluator.evaluate(a["click_coordinate"]["y"]),
+            "x": self._evaluate_or_default(a["click_coordinate"]["x"], defaults["CLICK_COORDINATE"]["x"]),
+            "y": self._evaluate_or_default(a["click_coordinate"]["y"], defaults["CLICK_COORDINATE"]["y"]),
         }
         Config.SEARCH_REGION = {
-            "top": self.evaluator.evaluate(a["search_region"]["top"]),
-            "left": self.evaluator.evaluate(a["search_region"]["left"]),
-            "width": self.evaluator.evaluate(a["search_region"]["width"]),
-            "height": self.evaluator.evaluate(a["search_region"]["height"]),
+            "top": self._evaluate_or_default(a["search_region"]["top"], defaults["SEARCH_REGION"]["top"]),
+            "left": self._evaluate_or_default(a["search_region"]["left"], defaults["SEARCH_REGION"]["left"]),
+            "width": self._evaluate_or_default(a["search_region"]["width"], defaults["SEARCH_REGION"]["width"]),
+            "height": self._evaluate_or_default(a["search_region"]["height"], defaults["SEARCH_REGION"]["height"]),
         }
-        Config.USE_FULLSCREEN_OFFSET = self.evaluator.evaluate(a["use_fullscreen_offset"])
-        Config.FULLSCREEN_Y_OFFSET = self.evaluator.evaluate(a["fullscreen_y_offset"])
-        Config.MAX_LINE_WIDTH_PX = self.evaluator.evaluate(a["max_line_width_px"])
-        Config.LINE_BLIND_BUFFER_PX = self.evaluator.evaluate(a["line_blind_buffer_px"])
-        Config.MIN_TARGET_WIDTH_PCT = float(self.evaluator.evaluate(a["min_target_width_pct"]))
-        Config.MIN_TARGET_HEIGHT_PCT = float(self.evaluator.evaluate(a["min_target_height_pct"]))
-        Config.ALLOW_TARGET_BLEED = self.evaluator.evaluate(a["allow_target_bleed"])
-        Config.TOOLTIP_MARKER_Y_OFFSET_PX = self.evaluator.evaluate(a["tooltip_marker_y_offset"])
-        Config.USE_PREDICTIVE_COLLISION = self.evaluator.evaluate(a["use_predictive_collision"])
-        Config.PREDICTIVE_COLLISION_BUFFER = float(self.evaluator.evaluate(a["predictive_collision_buffer"]))
-        Config.MAX_PREDICTION_LATENCY_MS = float(self.evaluator.evaluate(a["max_prediction_latency_ms"]))
+        Config.USE_FULLSCREEN_OFFSET = self._evaluate_or_default(a["use_fullscreen_offset"], defaults["USE_FULLSCREEN_OFFSET"])
+        Config.FULLSCREEN_Y_OFFSET = self._evaluate_or_default(a["fullscreen_y_offset"], defaults["FULLSCREEN_Y_OFFSET"])
+        Config.MAX_LINE_WIDTH_PX = self._evaluate_or_default(a["max_line_width_px"], defaults["MAX_LINE_WIDTH_PX"])
+        Config.LINE_BLIND_BUFFER_PX = self._evaluate_or_default(a["line_blind_buffer_px"], defaults["LINE_BLIND_BUFFER_PX"])
+        Config.MIN_TARGET_WIDTH_PCT = float(self._evaluate_or_default(a["min_target_width_pct"], defaults["MIN_TARGET_WIDTH_PCT"]))
+        Config.MIN_TARGET_HEIGHT_PCT = float(self._evaluate_or_default(a["min_target_height_pct"], defaults["MIN_TARGET_HEIGHT_PCT"]))
+        Config.ALLOW_TARGET_BLEED = self._evaluate_or_default(a["allow_target_bleed"], defaults["ALLOW_TARGET_BLEED"])
+        Config.TOOLTIP_MARKER_Y_OFFSET_PX = self._evaluate_or_default(a["tooltip_marker_y_offset"], defaults["TOOLTIP_MARKER_Y_OFFSET_PX"])
+        Config.USE_PREDICTIVE_COLLISION = self._evaluate_or_default(a["use_predictive_collision"], defaults["USE_PREDICTIVE_COLLISION"])
+        Config.PREDICTIVE_COLLISION_BUFFER = float(self._evaluate_or_default(a["predictive_collision_buffer"], defaults["PREDICTIVE_COLLISION_BUFFER"]))
+        Config.MAX_PREDICTION_LATENCY_MS = float(self._evaluate_or_default(a["max_prediction_latency_ms"], defaults["MAX_PREDICTION_LATENCY_MS"]))
 
         h = data["hotkey_settings"]
-        Config.TOGGLE_MOD = self.evaluator.evaluate(h["toggle"]["mod"])
-        Config.TOGGLE_KEY = self.evaluator.evaluate(h["toggle"]["key"])
-        Config.EXIT_MOD = self.evaluator.evaluate(h["exit"]["mod"])
-        Config.EXIT_KEY = self.evaluator.evaluate(h["exit"]["key"])
-        Config.MENU_MOD = self.evaluator.evaluate(h["menu"]["mod"])
-        Config.MENU_KEY = self.evaluator.evaluate(h["menu"]["key"])
-        Config.DEBUG_MOD = self.evaluator.evaluate(h["debug"]["mod"])
-        Config.DEBUG_KEY = self.evaluator.evaluate(h["debug"]["key"])
+        Config.TOGGLE_MOD = self._evaluate_or_default(h["toggle"]["mod"], defaults["TOGGLE_MOD"])
+        Config.TOGGLE_KEY = self._evaluate_or_default(h["toggle"]["key"], defaults["TOGGLE_KEY"])
+        Config.EXIT_MOD = self._evaluate_or_default(h["exit"]["mod"], defaults["EXIT_MOD"])
+        Config.EXIT_KEY = self._evaluate_or_default(h["exit"]["key"], defaults["EXIT_KEY"])
+        Config.MENU_MOD = self._evaluate_or_default(h["menu"]["mod"], defaults["MENU_MOD"])
+        Config.MENU_KEY = self._evaluate_or_default(h["menu"]["key"], defaults["MENU_KEY"])
+        Config.DEBUG_MOD = self._evaluate_or_default(h["debug"]["mod"], defaults["DEBUG_MOD"])
+        Config.DEBUG_KEY = self._evaluate_or_default(h["debug"]["key"], defaults["DEBUG_KEY"])
 
         b = data["behavior_settings"]
-        Config.ENABLE_DISCORD_RPC = self.evaluator.evaluate(b["enable_discord_rpc"])
+        Config.ENABLE_DISCORD_RPC = self._evaluate_or_default(
+            b["enable_discord_rpc"],
+            defaults["ENABLE_DISCORD_RPC"]
+        )
+
+    def _nullify_value(value):
+        if isinstance(value, dict):
+            return {k: nullify(v) for k, v in value.items()}
+        elif isinstance(value, list):
+            return [nullify(v) for v in value]
+        return None
 
     def _build_current_config(self):
         return {

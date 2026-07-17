@@ -20,6 +20,12 @@ class MathEvaluator:
         ast.BitXor: op.xor,
     }
 
+    _FUNCTIONS = {
+        "int": int,
+        "min": min,
+        "max": max,
+    }
+
     def __init__(self, variables=None):
         self._variables = variables or {}
 
@@ -33,6 +39,18 @@ class MathEvaluator:
             if node.id in self._variables:
                 return self._variables[node.id]
             raise ValueError(f"Unknown variable: {node.id}")
+
+        if isinstance(node, ast.Call):
+            if not isinstance(node.func, ast.Name):
+                raise ValueError("Only simple function calls allowed")
+
+            func_name = node.func.id
+            if func_name not in self._FUNCTIONS:
+                raise ValueError(f"Function {func_name} not allowed")
+
+            args = [self._eval(arg) for arg in node.args]
+
+            return self._FUNCTIONS[func_name](*args)
 
         if isinstance(node, ast.BinOp):
             op_type = type(node.op)
@@ -63,10 +81,10 @@ class MathEvaluator:
             return expression
 
         if not isinstance(expression, str):
-            return 0
+            return None # None will use the defaults in the config handler
 
         try:
             tree = ast.parse(expression, mode="eval")
             return self._eval(tree.body)
         except Exception:
-            return 0
+            return None

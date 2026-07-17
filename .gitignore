@@ -237,7 +237,7 @@ mllink$.lnk
 Storage_Hunters_Tool_Config_[0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9].json
 KC[0-9][0-9][0-9][0-9][0-9]*_*__*_*_st*_v*_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].json
 # Keep version control for public release library
-# !configs/KC[0-9][0-9][0-9][0-9][0-9]*_*__*_*_st*_v*_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].json
+!configs/KC[0-9][0-9][0-9][0-9][0-9]*_*__*_*_st*_v*_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].json
 # For a more nuclear option, the following could be uncommented
 # *[Cc]onfig*.json
 

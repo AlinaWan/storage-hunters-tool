@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import final as sealed
 
 from src.core.constants import Constants
@@ -87,3 +88,17 @@ class Config:
     MENU_MOD, MENU_KEY = 2, 121                      # Ctrl + F10 (0x0002, 0x79)
     CANCEL_SHUTDOWN_MOD, CANCEL_SHUTDOWN_KEY = 6, 88 # Ctrl + Shift + X (0x0002 | 0x0004, 0x58)
     DEBUG_MOD, DEBUG_KEY = 0, 118                    # F7 (0, 0x76)
+
+@sealed
+class ConfigDefaults:
+    @staticmethod
+    def create_default_config_copy():
+        """Returns a fresh deepcopy of the default configuration values."""
+        return deepcopy(_DEFAULT_CONFIG_STATE)
+
+# Make a copy of the default state to handle null -> use default
+_DEFAULT_CONFIG_STATE = {
+    key: value
+    for key, value in Config.__dict__.items()
+    if key.isupper()
+}

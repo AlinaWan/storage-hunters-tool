@@ -1,0 +1,71 @@
+{
+    "description": [
+        "----------------- Storage Hunters Tool Configuration ----------------",
+        " Feel free to add your own notes in the 'custom_info' section below! ",
+        "                                                                     ",
+        " You can write values as expressions based on screen dimensions with ",
+        " variables SCREEN_WIDTH and SCREEN_HEIGHT (e.g., SCREEN_HEIGHT / 2). ",
+        " Operators: +, -, *, /, //, %, **, +x, -x, &, |, ^, and parenthesis. ",
+        "                                                                     ",
+        " Hotkeys can be written as either hexadecimal or decimal. The        ",
+        " bitwise OR (|) operator is particularly useful for bitmasking.      ",
+        "---------------------------------------------------------------------"
+    ],
+    "metadata": {
+        "custom_info": {
+            "author": "Riri",
+            "description": "For potato laptops",
+            "article": "KC11400H"
+        },
+        "app_info": {
+            "version": "1.0.0",
+            "schema": 1,
+            "created": "2026-07-16T12:00:00.000000+00:00"
+        }
+    },
+    "automation_settings": {
+        "click_cooldown_ms": 300,
+        "click_coordinate": {
+            "x": "int(Constants.SCREEN_WIDTH / 2",
+            "y": "int(Constants.SCREEN_HEIGHT * (860 / 1080))"
+        },
+        "search_region": {
+            "top": null,
+            "left": null,
+            "width": null,
+            "height": null
+        },
+        "use_fullscreen_offset": false,
+        "fullscreen_y_offset": "int(Constants.SCREEN_HEIGHT * (40 / 1080))",
+        "max_line_width_px": "int(Constants.SCREEN_WIDTH * (20 / 1920))",
+        "line_blind_buffer_px": "int(Constants.SCREEN_WIDTH * (15 / 1920))",
+        "min_target_width_pct": 5.0,
+        "min_target_height_pct": 90.0,
+        "allow_target_bleed": true,
+        "tooltip_marker_y_offset": "int(Constants.SCREEN_HEIGHT * (20 / 1080))",
+        "use_predictive_collision": true,
+        "predictive_collision_buffer": 0.0,
+        "max_prediction_latency_ms": 120.0
+    },
+    "hotkey_settings": {
+        "toggle": {
+            "mod": "0x0",
+            "key": "0x75"
+        },
+        "exit": {
+            "mod": "0x0004",
+            "key": "0x1B"
+        },
+        "menu": {
+            "mod": "0x0002",
+            "key": "0x79"
+        },
+        "debug": {
+            "mod": "0x0",
+            "key": "0x76"
+        }
+    },
+    "behavior_settings": {
+        "enable_discord_rpc": false
+    }
+}
