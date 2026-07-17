@@ -24,6 +24,7 @@ class MathEvaluator:
         "int": int,
         "min": min,
         "max": max,
+        "abs": abs,
     }
 
     def __init__(self, variables=None):
