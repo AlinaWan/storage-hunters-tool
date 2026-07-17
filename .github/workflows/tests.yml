@@ -1,6 +1,9 @@
 name: Run Tests
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -12,20 +15,38 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
+      # Set up Python, Python dependencies, and Pytest
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.14'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
 
       - name: Install Python dependencies and Pytest
         run: |
             pip install -r requirements.txt
             pip install pytest==9.1.1
 
+      # Compile native C++ and assembly source files
+      - name: Hash native build files
+        id: native-hash
+        run: |
+            echo hash=${{ hashFiles('src/native/**', 'build_native.cmd', 'build_local_native.cmd', 'build_engine_native.cmd') }}>>%GITHUB_OUTPUT%
+
+      - name: Cache compiled native artifacts
+        id: cache-native
+        uses: actions/cache@v6
+        with:
+          path: src/native/
+          key: native-build-${{ runner.os }}-${{ steps.native-hash.outputs.hash }}
+
       - name: Compile C++ and assembly
+        if: steps.cache-native.outputs.cache-hit != 'true'
         run: |
             call "%ProgramFiles%\Microsoft Visual Studio\18\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             build_native.cmd
 
+      # Run tests with Pytest
       - name: Run tests
         run: python -m pytest
