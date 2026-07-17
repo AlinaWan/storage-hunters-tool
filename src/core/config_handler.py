@@ -24,6 +24,11 @@ class ConfigHandler(LoggerMixin):
         self.evaluator = evaluator
 
     def apply_config(self, data):
+        # REMARK: (AlinaWan - 2026-07-16)
+        # In the future, the JSON value null should be able to
+        # be used to use the default values defined in src.core.config.Config.
+        # Right now, the Config class is a mutable DTO, so any implementation
+        # of this described feature might use copy.deepcopy to save the defaults.
         a = data["automation_settings"]
         Config.CLICK_COOLDOWN_MS = self.evaluator.evaluate(a["click_cooldown_ms"])
         Config.CLICK_COORDINATE = {

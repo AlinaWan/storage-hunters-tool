@@ -370,10 +370,27 @@ class Application(LoggerMixin, IApplication):
 
                         # If the line is touching the target bounds, contract them
                         # this fixes the tracking line from expanding the target area when they touch
+
+                        # REMARK: (AlinaWan - 2026-07-16)
+                        # During the assembly migration, the original `line_cols` computation was removed.
+                        # Previously it was calculated as:
+                        #
+                        #     line_cols = np.where(np.any(line_mask, axis=0))[0]
+                        #
+                        # The remaining logic only ever consumed `np.min(line_cols)` and
+                        # `np.max(line_cols)` for line-bleeding correction. The ASM pipeline already
+                        # computes equivalent line bounds (`lx1`/`lx2` via `line_coords`), so using those
+                        # values should effectively reproduce the original behavior without recreating
+                        # the intermediate `line_cols` array.
+                        #
+                        # If any future issues arise related to target bleed or line-bound handling,
+                        # compare this implementation against the pre-migration version to verify that
+                        # the behavior still matches:
+                        # https://github.com/AlinaWan/storage-hunters-tool/blob/35b4170f0f6ae36022256131c77a27272e84782a/src/program.pyw
+                        # (commit: 35b4170f0f6ae36022256131c77a27272e84782a)
                         if not Config.ALLOW_TARGET_BLEED:
-                            if line_center_x is not None and line_cols is not None and len(line_cols) > 0:
-                                lx1 = int(np.min(line_cols))
-                                lx2 = int(np.max(line_cols))
+                            if line_coords is not None:
+                                lx1, _, lx2, _ = line_coords
                             
                                 # If the line is bleeding into the left side of the target
                                 if true_tx1 <= lx2 and true_tx1 >= lx1 - 5:
@@ -401,10 +418,10 @@ class Application(LoggerMixin, IApplication):
 
             # Apply the same line-bleeding fix to the visual box bounds
             if not Config.ALLOW_TARGET_BLEED:
-                if target_coords is not None and line_cols is not None and len(line_cols) > 0:
+                if target_coords is not None and line_coords is not None:
                     tx1, y1, tx2, y2 = target_coords
-                    lx1 = int(np.min(line_cols))
-                    lx2 = int(np.max(line_cols))
+                    lx1, _, lx2, _ = line_coords
+
                     if tx1 <= lx2 and tx1 >= lx1 - 5:
                         tx1 = lx2 + 1
                     if tx2 >= lx1 and tx2 <= lx2 + 5:
