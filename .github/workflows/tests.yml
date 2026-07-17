@@ -1,0 +1,31 @@
+name: Run Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: windows-2025-vs2026
+    defaults:
+      run:
+        shell: cmd
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install Python dependencies and Pytest
+        run: |
+            pip install -r requirements.txt
+            pip install pytest==9.1.1
+
+      - name: Compile C++ and assembly
+        run: |
+            call "%ProgramFiles%\Microsoft Visual Studio\18\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            build_native.cmd
+
+      - name: Run tests
+        run: python -m pytest
