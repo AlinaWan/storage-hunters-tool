@@ -48,6 +48,8 @@ def test_modulo_and_power(evaluator):
 def test_whitelisted_functions(evaluator):
     assert evaluator.evaluate("int(5.9)") == 5
     assert evaluator.evaluate("int()") == 0
+    assert evaluator.evaluate("round(1.5)") is 2
+    assert evaluator.evaluate("round(2.5)") is 2
     assert evaluator.evaluate("min(10, 3, 8)") == 3
     assert evaluator.evaluate("max(10, 3, 8)") == 10
     assert evaluator.evaluate("abs(-123)") == 123
@@ -57,7 +59,6 @@ def test_nested_function_calls(evaluator):
     assert evaluator.evaluate("int(max(1.2, 2.8))") == 2
 
 def test_invalid_function_calls(evaluator):
-    assert evaluator.evaluate("round(1.5)") is None
     assert evaluator.evaluate("__import__('os')") is None
     assert evaluator.evaluate("eval('1+1')") is None
 

@@ -22,6 +22,7 @@ class MathEvaluator:
 
     _FUNCTIONS = {
         "int": int,
+        "round": round,
         "min": min,
         "max": max,
         "abs": abs,
@@ -43,7 +44,7 @@ class MathEvaluator:
 
         if isinstance(node, ast.Call):
             if not isinstance(node.func, ast.Name):
-                raise ValueError("Only simple function calls allowed")
+                raise ValueError("Only direct function calls allowed")
 
             func_name = node.func.id
             if func_name not in self._FUNCTIONS:

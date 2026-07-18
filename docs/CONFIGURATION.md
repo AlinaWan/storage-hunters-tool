@@ -75,6 +75,7 @@ Numeric configuration values also support mathematical expressions. Expressions 
 | Function | Description | Example |
 | :--- | :--- | :--- |
 | `int(x)` | Converts a number to an integer by truncating the decimal portion | `int(10.8)` → `10` |
+| `round(x)` | Rounds a number to the nearest integer using banker's rounding | `round(10.8)` → `11` |
 | `min(x, ...)` | Returns the smallest value from the provided numbers | `min(100, 50, 75)` → `50` |
 | `max(x, ...)` | Returns the largest value from the provided numbers | `max(100, 50, 75)` → `100` |
 | `abs(x)` | Returns the absolute value of a number | `abs(-50)` → `50` |
