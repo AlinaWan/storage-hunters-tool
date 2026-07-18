@@ -44,7 +44,8 @@ class ApplicationOrchestrator(IApplicationOrchestrator):
         SafeMessageBox.show_message_box_sync(
             "Another instance of Storage Hunters Tool is already running.",
             "Already Running",
-            NativeMethods.MB_OK | NativeMethods.MB_ICONINFORMATION
+            NativeMethods.MB_OK | NativeMethods.MB_ICONINFORMATION,
+            topmost=True
         )
 
     def _handle_fatal_error(self, e):
@@ -79,5 +80,5 @@ class ApplicationOrchestrator(IApplicationOrchestrator):
             )
 
         SafeMessageBox.show_message_box_sync(
-            message, "Fatal Error", NativeMethods.MB_OK | NativeMethods.MB_ICONERROR
+            message, "Fatal Error", NativeMethods.MB_OK | NativeMethods.MB_ICONERROR, topmost=True
         )

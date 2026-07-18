@@ -10,11 +10,16 @@ std::wstring s2ws(const std::string& str) {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
-    if (__argc < 4) return 1;
+    if (__argc < 5) return 1;
 
     std::wstring text = s2ws(__argv[1]);
     std::wstring title = s2ws(__argv[2]);
     UINT flags = static_cast<UINT>(std::stoul(__argv[3]));
+    bool topmost = std::stoi(__argv[4]) != 0;
+
+    // force topmost if requested
+    if (topmost)
+        flags |= MB_TOPMOST | MB_SETFOREGROUND;
 
     int result = MessageBoxW(NULL, text.c_str(), title.c_str(), flags);
 

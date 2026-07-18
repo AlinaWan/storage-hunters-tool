@@ -23,7 +23,7 @@ class MessageBoxResult(Enum):
 @sealed
 class SafeMessageBox():
     @staticmethod
-    def show_message_box_async(text, title, flags, callback):
+    def show_message_box_async(text, title, flags, callback, topmost=False):
         def worker():
             try:
                 worker_path = os.path.join(
@@ -34,7 +34,8 @@ class SafeMessageBox():
                         worker_path,  
                         text,  
                         title,  
-                        str(flags)  
+                        str(flags),
+                        "1" if topmost else "0"
                     ],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
@@ -56,7 +57,7 @@ class SafeMessageBox():
         threading.Thread(target=worker, daemon=True).start()
 
     @staticmethod
-    def show_message_box_sync(text, title, flags):
+    def show_message_box_sync(text, title, flags, topmost=False):
         try:
             worker_path = os.path.join(
                 "src\\native\\MessageBoxWorker.exe"
@@ -67,7 +68,8 @@ class SafeMessageBox():
                     worker_path,  
                     text,  
                     title,  
-                    str(flags)  
+                    str(flags),
+                    "1" if topmost else "0"
                 ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
