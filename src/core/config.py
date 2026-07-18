@@ -3,6 +3,14 @@ from typing import final as sealed
 
 from src.core.constants import Constants
 
+## <summary>
+## Represents a mutable configuration data transfer object (DTO).
+## </summary>
+## <remarks>
+## This container is intended to be modified after creation. To obtain a new
+## instance initialized with the default configuration, call
+## <see cref="ConfigDefaults.create_default_config_copy"/>.
+## </remarks>
 @sealed
 class Config:
 
@@ -11,6 +19,8 @@ class Config:
     CLICK_COORDINATE = {"x": int(Constants.SCREEN_WIDTH / 2),
                         "y": int(Constants.SCREEN_HEIGHT * (860 / 1080))}
 
+    # Search region presets for supported display aspect ratios.
+    # Coordinates are scaled from reference captures for each resolution family.
     if Constants.SCREEN_WIDTH * 9 == Constants.SCREEN_HEIGHT * 16:
         SEARCH_REGION = {"top":    int(Constants.SCREEN_HEIGHT * (752 / 1080)),
                          "left":   int(Constants.SCREEN_WIDTH  * (614 / 1920)),
@@ -89,8 +99,17 @@ class Config:
     CANCEL_SHUTDOWN_MOD, CANCEL_SHUTDOWN_KEY = 6, 88 # Ctrl + Shift + X (0x0002 | 0x0004, 0x58)
     DEBUG_MOD, DEBUG_KEY = 0, 118                    # F7 (0, 0x76)
 
+## <summary>
+## Provides factory methods for creating configuration objects with default values.
+## </summary>
 @sealed
 class ConfigDefaults:
+    ## <summary>
+    ## Creates a new mutable configuration DTO initialized with the default values.
+    ## </summary>
+    ## <returns>
+    ## A new <see cref="Config"/> containing the default configuration.
+    ## </returns>
     @staticmethod
     def create_default_config_copy():
         """Returns a fresh deepcopy of the default configuration values."""
