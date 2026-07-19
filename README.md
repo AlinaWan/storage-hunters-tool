@@ -60,9 +60,9 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
    pip install -r requirements.txt
    ```
 
-2. Compile the **C++ & x86-64 Assembly files** via x64 Native Tools Command Prompt for VS 2022/VS:
-   ```cmd
-   build_native.cmd
+2. Compile the **C++ & x86-64 Assembly files**:
+   ```powershell
+   .\build_native.cmd
    ```
 
 3.  Initialize the script via terminal:
