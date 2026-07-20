@@ -3,16 +3,18 @@ from typing import final as sealed
 
 from src.core.constants import Constants
 
-## <summary>
-## Represents a mutable configuration data transfer object (DTO).
-## </summary>
-## <remarks>
-## This container is intended to be modified after creation. To obtain a new
-## instance initialized with the default configuration, call
-## <see cref="ConfigDefaults.create_default_config_copy"/>.
-## </remarks>
 @sealed
 class Config:
+    """
+    <summary>
+    Represents a mutable configuration data transfer object (DTO).
+    </summary>
+    <remarks>
+    This container is intended to be modified after creation. To obtain a new
+    instance initialized with the default configuration, call
+    <see cref="ConfigDefaults.create_default_config_copy"/>.
+    </remarks>
+    """
 
     # Automation
     CLICK_COOLDOWN_MS = 250
@@ -99,20 +101,23 @@ class Config:
     CANCEL_SHUTDOWN_MOD, CANCEL_SHUTDOWN_KEY = 6, 88 # Ctrl + Shift + X (0x0002 | 0x0004, 0x58)
     DEBUG_MOD, DEBUG_KEY = 0, 118                    # F7 (0, 0x76)
 
-## <summary>
-## Provides factory methods for creating configuration objects with default values.
-## </summary>
 @sealed
 class ConfigDefaults:
-    ## <summary>
-    ## Creates a new mutable configuration DTO initialized with the default values.
-    ## </summary>
-    ## <returns>
-    ## A new <see cref="Config"/> containing the default configuration.
-    ## </returns>
+    """
+    <summary>
+    Provides factory methods for creating configuration objects with default values.
+    </summary>
+    """
     @staticmethod
     def create_default_config_copy():
-        """Returns a fresh deepcopy of the default configuration values."""
+        """
+        <summary>
+        Creates a new mutable configuration DTO initialized with the default values.
+        </summary>
+        <returns>
+        A new <see cref="Config"/> containing the default configuration.
+        </returns>
+        """
         return deepcopy(_DEFAULT_CONFIG_STATE)
 
 # Make a copy of the default state to handle null -> use default

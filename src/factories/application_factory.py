@@ -41,7 +41,7 @@ class ApplicationFactory(IApplicationFactory):
 
         provider_path = os.getenv("FRAME_PROVIDER", "src.services.dxgi_frame_provider.DxgiFrameProvider")
         try:
-            frame_provider = ReflectionUtil.instantiate_class_from_fqn(provider_path)
+            frame_provider = ReflectionUtil.instantiate_class_from_fully_qualified_name(provider_path)
             init_logger.info(f"Successfully loaded frame provider: {provider_path}")
         except ImportError as e:
             init_logger.critical(f"Failed to load frame provider from target path: {provider_path}")
