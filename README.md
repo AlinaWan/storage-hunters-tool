@@ -62,7 +62,7 @@ Storage Hunters Tool relies on Windows Dynamic Link Libraries (WinDLLs) for core
 
 2. Compile the **C++ & x86-64 Assembly files**:
    ```powershell
-   .\build_native.cmd
+   cmd /c build_native.cmd
    ```
 
 3.  Initialize the script via terminal:
