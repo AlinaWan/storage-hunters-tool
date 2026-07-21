@@ -9,6 +9,9 @@ All adjustable parameters can be stored in a human-readable `.json` file. This a
 
 These configuration files can be managed through the in-app menu (<kbd>Ctrl</kbd> + <kbd>F10</kbd>), providing a user-friendly interface for customization and optimization based on individual hardware capabilities and display setups.
 
+> [!TIP]
+> You can also import a configuration instantly by dragging and dropping a `.json` configuration file anywhere inside the menu.
+
 ## ⚙️ Constants Breakdown
 
 Adjust these values within your `.json` config to align with your hardware's performance profile.
