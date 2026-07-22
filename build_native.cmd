@@ -12,6 +12,10 @@ for %%E in (Community Professional Enterprise BuildTools) do (
     )
 )
 echo [31m!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Could not find vcvars64.bat !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!![0m
+echo.
+echo [31mVisual C++ variables could not be automatically initialized.[0m
+echo [31mPlease open "x64 Native Tools Command Prompt for VS 2022" or[0m
+echo [31m"x64 Native Tools Command Prompt for VS" and run this script again.[0m
 exit /b 1
 
 :vcvars64_found
